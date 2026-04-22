@@ -1,0 +1,423 @@
+<div class="page-wrapper">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       LEFT PANEL — Animated Chat Bubbles (different from login)
+  ════════════════════════════════════════════════════════════════ -->
+  <div class="left-panel">
+
+    <!-- Animated floating chat bubbles (CSS-only, no image) -->
+    <div class="bubbles-scene" aria-hidden="true">
+      <div class="bubble b1">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                fill="rgba(192,132,252,0.5)" stroke="rgba(192,132,252,0.9)" stroke-width="1.5"/>
+        </svg>
+        <span class="bubble-msg">Hey! 👋</span>
+      </div>
+      <div class="bubble b2">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                fill="rgba(139,92,246,0.4)" stroke="rgba(139,92,246,0.8)" stroke-width="1.5"/>
+        </svg>
+        <span class="bubble-msg">Hello there! 😊</span>
+      </div>
+      <div class="bubble b3">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                fill="rgba(245,158,11,0.3)" stroke="rgba(245,158,11,0.7)" stroke-width="1.5"/>
+        </svg>
+        <span class="bubble-msg">Let's chat! 🚀</span>
+      </div>
+      <div class="bubble b4">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                fill="rgba(192,132,252,0.35)" stroke="rgba(192,132,252,0.7)" stroke-width="1.5"/>
+        </svg>
+        <span class="bubble-msg">Secure ✓</span>
+      </div>
+      <div class="bubble b5">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                fill="rgba(167,139,250,0.4)" stroke="rgba(167,139,250,0.8)" stroke-width="1.5"/>
+        </svg>
+        <span class="bubble-msg">Real-time ⚡</span>
+      </div>
+      <div class="bubble b6">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                fill="rgba(139,92,246,0.35)" stroke="rgba(139,92,246,0.75)" stroke-width="1.5"/>
+        </svg>
+        <span class="bubble-msg">50K+ Users 🌐</span>
+      </div>
+
+      <!-- Decorative glow dots -->
+      <div class="dot dot1"></div>
+      <div class="dot dot2"></div>
+      <div class="dot dot3"></div>
+      <div class="dot dot4"></div>
+    </div>
+
+    <div class="left-content">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="15" stroke="white" stroke-width="1.5"/>
+            <path d="M8 12h16M8 16h10M8 20h13" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="brand-name">ConnectHub</span>
+      </div>
+
+      <div class="hero-text">
+        <h1 class="hero-heading">Join thousands<br>already chatting<br>in real&nbsp;time.</h1>
+        <p class="hero-sub">Zero setup. Instant rooms. End-to-end secure.<br>Your conversations, always private.</p>
+      </div>
+
+      <div class="feature-list">
+        <div class="feature-item">
+          <span class="feature-dot"></span>
+          <span>Real-time WebSocket messaging</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-dot"></span>
+          <span>JWT-secured private rooms</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-dot"></span>
+          <span>Online presence &amp; read receipts</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-dot"></span>
+          <span>Google sign-in</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       RIGHT PANEL — Sign Up Form
+  ════════════════════════════════════════════════════════════════ -->
+  <div class="right-panel">
+
+    <!-- Mobile brand -->
+    <div class="mobile-brand">
+      <div class="brand-icon small">
+        <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="15" stroke="white" stroke-width="1.5"/>
+          <path d="M8 12h16M8 16h10M8 20h13" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="brand-name">ConnectHub</span>
+    </div>
+
+    <div class="register-card" id="register-card">
+
+      <div class="card-header">
+        <h2 class="card-title">Create your account</h2>
+        <p class="card-subtitle">
+          Already have one?
+          <a routerLink="/login" class="login-link" id="go-to-login">Login</a>
+        </p>
+      </div>
+
+      <!-- ── OAuth row (top, matching login style) ── -->
+      <div class="oauth-row-top">
+        <button class="btn-oauth" id="google-signup-btn" (click)="signUpWithGoogle()" type="button">
+          <svg width="17" height="17" viewBox="0 0 48 48">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          Google
+        </button>
+      </div>
+
+      <div class="divider">
+        <span class="divider-line"></span>
+        <span class="divider-text">or sign up with email</span>
+        <span class="divider-line"></span>
+      </div>
+
+      <!-- ── Form ── -->
+      <form [formGroup]="registerForm" (ngSubmit)="onRegister()" novalidate id="register-form">
+
+        <!-- Row 1: First + Last Name -->
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label class="field-label" for="firstName">First Name</label>
+            <div class="input-wrapper" [class.has-error]="f['firstName'].invalid && f['firstName'].touched">
+              <input id="firstName" type="text" class="form-input"
+                     placeholder="First name" formControlName="firstName" autocomplete="given-name"/>
+            </div>
+            @if (f['firstName'].invalid && f['firstName'].touched) {
+              <span class="field-error">First name is required (min 2 chars).</span>
+            }
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="lastName">Last Name</label>
+            <div class="input-wrapper" [class.has-error]="f['lastName'].invalid && f['lastName'].touched">
+              <input id="lastName" type="text" class="form-input"
+                     placeholder="Last name" formControlName="lastName" autocomplete="family-name"/>
+            </div>
+            @if (f['lastName'].invalid && f['lastName'].touched) {
+              <span class="field-error">Last name is required (min 2 chars).</span>
+            }
+          </div>
+        </div>
+
+        <!-- Username -->
+        <div class="field-group">
+          <label class="field-label" for="username">Username</label>
+          <div class="input-wrapper" [class.has-error]="f['username'].invalid && f['username'].touched">
+            <span class="input-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+            </span>
+            <input id="username" type="text" class="form-input"
+                   placeholder="e.g. john_doe99" formControlName="username"
+                   autocomplete="username"
+                   (keydown)="onUsernameKeydown($event)"
+                   (input)="onUsernameInput($event)"/>
+          </div>
+          <!-- Space error — shows immediately on keypress -->
+          @if (usernameSpaceError()) {
+            <span class="field-error space-err">
+              ⚠ Username cannot contain spaces.
+            </span>
+          }
+          <!-- Pattern / length error -->
+          @if (f['username'].invalid && f['username'].touched && !usernameSpaceError()) {
+            <span class="field-error">
+              {{ f['username'].errors?.['required']  ? 'Username is required.' :
+                 f['username'].errors?.['pattern']   ? 'Letters, numbers and underscores only.' :
+                 'Username must be 3–50 characters.' }}
+            </span>
+          }
+          <!-- Availability check -->
+          @if (checkingUsername()) {
+            <span class="field-hint">Checking availability…</span>
+          }
+          @if (!checkingUsername() && usernameUnavailable()) {
+            <span class="field-error">⚠ This username is already taken. Try another.</span>
+          }
+          @if (!checkingUsername() && !usernameUnavailable() && f['username'].valid && f['username'].touched) {
+            <span class="field-hint available">✓ Username is available!</span>
+          }
+        </div>
+
+        <!-- Row: Country + City -->
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label class="field-label" for="country">Country</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="2" y1="12" x2="22" y2="12"/>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+              </span>
+              <input id="country" type="text" class="form-input"
+                     placeholder="e.g. India" formControlName="country" autocomplete="country-name"/>
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="city">City</label>
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+              </span>
+              <input id="city" type="text" class="form-input"
+                     placeholder="e.g. Mumbai" formControlName="city" autocomplete="address-level2"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phone Number with Dial Code -->
+        <div class="field-group">
+          <label class="field-label" for="phoneNumber">Phone Number <span class="optional">(optional)</span></label>
+          <div class="phone-row" [class.has-error]="f['phoneNumber'].invalid && f['phoneNumber'].touched">
+
+            <!-- Dial code button + dropdown -->
+            <div class="dial-selector-wrap">
+              <button type="button" class="dial-btn" (click)="toggleDialDropdown($event)" id="dial-btn">
+                <span class="dial-flag">{{ selectedCountry().flag }}</span>
+                <span class="dial-code-label">{{ selectedCountry().dial }}</span>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                     [style.transform]="showDialDropdown() ? 'rotate(180deg)' : 'rotate(0)'"
+                     style="transition:.2s ease;flex-shrink:0">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
+
+              <!-- Dropdown panel -->
+              @if (showDialDropdown()) {
+                <div class="dial-dropdown" id="dial-dropdown">
+                  <div class="dial-search-row">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input class="dial-search-input" placeholder="Search country..."
+                           [value]="dialSearch()" (input)="onDialSearch($event)"
+                           (click)="$event.stopPropagation()" autofocus/>
+                  </div>
+                  <div class="dial-list" id="dial-list">
+                    @for (c of filteredCountries(); track c.code) {
+                      <div class="dial-item"
+                           [class.active]="c.code === selectedCountry().code"
+                           (click)="selectCountry(c, $event)">
+                        <span class="item-flag">{{ c.flag }}</span>
+                        <span class="item-name">{{ c.name }}</span>
+                        <span class="item-dial">{{ c.dial }}</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Phone digits input -->
+            <input type="tel" id="phoneNumber" class="form-input phone-input"
+                   placeholder="Phone number" formControlName="phoneNumber" autocomplete="tel-local"/>
+          </div>
+          @if (f['phoneNumber'].invalid && f['phoneNumber'].touched) {
+            <span class="field-error">Phone number must be 5–15 digits only.</span>
+          }
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="reg-email">Email</label>
+          <div class="input-wrapper" [class.has-error]="f['email'].invalid && f['email'].touched">
+            <span class="input-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                <polyline points="22,6 12,13 2,6"/>
+              </svg>
+            </span>
+            <input id="reg-email" type="email" class="form-input"
+                   placeholder="you@example.com" formControlName="email" autocomplete="email"/>
+          </div>
+          @if (f['email'].invalid && f['email'].touched) {
+            <span class="field-error">
+              {{ f['email'].errors?.['required'] ? 'Email is required.' : 'Enter a valid email address.' }}
+            </span>
+          }
+        </div>
+
+        <!-- Row 2: Password + Confirm Password -->
+        <div class="form-grid-2">
+          <div class="field-group">
+            <label class="field-label" for="reg-password">Password</label>
+            <div class="input-wrapper" [class.has-error]="f['password'].invalid && f['password'].touched">
+              <span class="input-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </span>
+              <input id="reg-password" [type]="showPassword() ? 'text' : 'password'"
+                     class="form-input" placeholder="Min. 6 chars"
+                     formControlName="password" autocomplete="new-password"/>
+              <button type="button" class="eye-toggle" (click)="togglePassword()" aria-label="Toggle password">
+                @if (showPassword()) {
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                } @else {
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                }
+              </button>
+            </div>
+            @if (passwordError()) {
+              <span class="field-error">{{ passwordError() }}</span>
+            }
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="confirm-password">Confirm</label>
+            <div class="input-wrapper" [class.has-error]="(f['confirmPassword'].touched && f['confirmPassword'].invalid) || passwordMismatch">
+              <span class="input-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </span>
+              <input id="confirm-password" [type]="showConfirmPassword() ? 'text' : 'password'"
+                     class="form-input" placeholder="Repeat password"
+                     formControlName="confirmPassword" autocomplete="new-password"/>
+              <button type="button" class="eye-toggle" (click)="toggleConfirmPassword()" aria-label="Toggle confirm password">
+                @if (showConfirmPassword()) {
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                } @else {
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                }
+              </button>
+            </div>
+            @if (passwordMismatch) {
+              <span class="field-error">Passwords do not match.</span>
+            }
+          </div>
+        </div>
+
+        <!-- Terms Checkbox -->
+        <div class="terms-row" [class.terms-error]="f['terms'].invalid && f['terms'].touched">
+          <label class="custom-checkbox">
+            <input type="checkbox" formControlName="terms" id="terms-checkbox"/>
+            <span class="checkmark"></span>
+            <span class="terms-text">
+              I agree to ConnectHub's
+              <a href="#" class="terms-link">Terms of Service</a> &amp;
+              <a href="#" class="terms-link">Privacy Policy</a>
+            </span>
+          </label>
+          @if (f['terms'].invalid && f['terms'].touched) {
+            <span class="field-error" style="margin-top:.3rem">You must accept the terms to continue.</span>
+          }
+        </div>
+
+        <!-- Error Banner -->
+        @if (registerError()) {
+          <div class="error-banner" role="alert">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            {{ registerError() }}
+          </div>
+        }
+
+        <!-- Submit -->
+        <button type="submit" class="btn-register" id="register-submit-btn" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <span class="spinner"></span> Creating account…
+          } @else {
+            Create Account
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+          }
+        </button>
+
+      </form>
+    </div>
+  </div>
+</div>
