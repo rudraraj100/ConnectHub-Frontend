@@ -48,8 +48,14 @@ export class LoginComponent {
 
     this.authService.login(this.loginForm.value).subscribe({
       next: (res) => {
-        // Tokens saved inside AuthService.login() via tap()
-        this.router.navigate(['/dashboard']);
+        // Tokens already saved inside AuthService.login() via tap()
+        // Route admin to admin dashboard, everyone else to chat
+        const email = res?.data?.user?.email || this.loginForm.value.email || '';
+        if (email === 'rudrar2002@gmail.com') {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/chat']);
+        }
       },
       error: (err) => {
         this.loginError.set(err.error?.message || 'Invalid email or password.');

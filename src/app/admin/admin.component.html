@@ -1,0 +1,168 @@
+<div class="admin-shell">
+  <!-- Sidebar -->
+  <nav class="admin-nav">
+    <div class="admin-brand">
+      <span>Connect<b>Hub</b></span>
+      <span class="admin-tag">Admin</span>
+    </div>
+    <div class="nav-items">
+      <button [class.active]="activeSection==='overview'"  (click)="activeSection='overview'"  class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Overview
+      </button>
+      <button [class.active]="activeSection==='users'"     (click)="activeSection='users'"     class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users
+        <span class="count-badge">{{ totalUsers }}</span>
+      </button>
+      <button [class.active]="activeSection==='rooms'"     (click)="activeSection='rooms'"     class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Rooms
+        <span class="count-badge">{{ totalRooms }}</span>
+      </button>
+      <button [class.active]="activeSection==='broadcast'" (click)="activeSection='broadcast'" class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.35 2 2 0 0 1 3.62 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.1a16 16 0 0 0 6 6l.86-.86a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 15.5"/></svg>Broadcast
+      </button>
+      <button [class.active]="activeSection==='logs'"      (click)="activeSection='logs'"      class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Audit Logs
+        <span class="count-badge">{{ logs.length }}</span>
+      </button>
+    </div>
+    <button class="back-btn" (click)="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Back to Chat
+    </button>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="admin-main">
+
+    <!-- Overview -->
+    <div class="section" *ngIf="activeSection==='overview'">
+      <h2 class="section-title">Platform Overview</h2>
+      <div class="analytics-grid">
+        <div class="ana-card purple">
+          <div class="ana-icon">👥</div>
+          <div class="ana-num">{{ totalUsers }}</div>
+          <div class="ana-label">Total Users</div>
+        </div>
+        <div class="ana-card green">
+          <div class="ana-icon">🟢</div>
+          <div class="ana-num">{{ activeUsers }}</div>
+          <div class="ana-label">Active Users</div>
+        </div>
+        <div class="ana-card red">
+          <div class="ana-icon">🚫</div>
+          <div class="ana-num">{{ suspendedUsers }}</div>
+          <div class="ana-label">Suspended</div>
+        </div>
+        <div class="ana-card blue">
+          <div class="ana-icon">🏠</div>
+          <div class="ana-num">{{ totalRooms }}</div>
+          <div class="ana-label">Active Rooms</div>
+        </div>
+        <div class="ana-card amber">
+          <div class="ana-icon">💬</div>
+          <div class="ana-num">{{ totalMessages.toLocaleString() }}</div>
+          <div class="ana-label">Total Messages</div>
+        </div>
+        <div class="ana-card teal">
+          <div class="ana-icon">📁</div>
+          <div class="ana-num">2.4 GB</div>
+          <div class="ana-label">Storage Used</div>
+        </div>
+      </div>
+      <div class="ws-card">
+        <div class="ws-dot"></div>
+        <div>
+          <div class="ws-title">WebSocket Connections</div>
+          <div class="ws-sub">Real-time count — available after WebSocket integration</div>
+        </div>
+        <div class="ws-num">—</div>
+      </div>
+    </div>
+
+    <!-- Users -->
+    <div class="section" *ngIf="activeSection==='users'">
+      <h2 class="section-title">User Accounts</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>User</th><th>Email</th><th>Role</th><th>Joined</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of users" [class.suspended-row]="u.status==='suspended'">
+              <td><div class="table-avatar">{{ u.name.charAt(0) }}<span>{{ u.name }}</span></div></td>
+              <td class="muted">{{ u.email }}</td>
+              <td><span class="role-chip" [class.admin-chip]="u.role==='Admin'">{{ u.role }}</span></td>
+              <td class="muted">{{ u.joined }}</td>
+              <td><span class="status-pill" [class.active-pill]="u.status==='active'" [class.susp-pill]="u.status==='suspended'">{{ u.status }}</span></td>
+              <td>
+                <div class="action-btns">
+                  <button class="act-btn toggle-btn" (click)="toggleUserStatus(u)" [title]="u.status==='active'?'Suspend':'Reactivate'">
+                    {{ u.status==='active' ? 'Suspend' : 'Reactivate' }}
+                  </button>
+                  <button class="act-btn del-btn" (click)="deleteUser(u)" *ngIf="u.email!=='rudrar2002@gmail.com'">Delete</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Rooms -->
+    <div class="section" *ngIf="activeSection==='rooms'">
+      <h2 class="section-title">All Rooms</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr><th>Room</th><th>Members</th><th>Messages</th><th>Created</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of rooms">
+              <td><strong class="room-name">{{ r.name }}</strong></td>
+              <td class="muted">{{ r.members }}</td>
+              <td class="muted">{{ r.messages.toLocaleString() }}</td>
+              <td class="muted">{{ r.created }}</td>
+              <td><button class="act-btn del-btn" (click)="deleteRoom(r)">Delete</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Broadcast -->
+    <div class="section" *ngIf="activeSection==='broadcast'">
+      <h2 class="section-title">Platform Broadcast</h2>
+      <div class="broadcast-card">
+        <p class="bc-desc">Send a message to all connected users on the platform. WebSocket delivery will be activated after STOMP integration.</p>
+        <textarea [(ngModel)]="broadcastMsg" placeholder="Type your broadcast message…" rows="5" id="broadcast-input" class="bc-input"></textarea>
+        <div class="bc-footer">
+          <span class="bc-hint">{{ broadcastMsg.length }} / 500 characters</span>
+          <button class="bc-send-btn" (click)="sendBroadcast()" [disabled]="!broadcastMsg.trim()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Send Broadcast
+          </button>
+        </div>
+        <div class="bc-success" *ngIf="broadcastSent">✅ Broadcast queued successfully!</div>
+      </div>
+    </div>
+
+    <!-- Audit Logs -->
+    <div class="section" *ngIf="activeSection==='logs'">
+      <h2 class="section-title">Audit Logs</h2>
+      <div class="logs-list">
+        <div class="log-item" *ngFor="let l of logs">
+          <div class="log-icon">🛡️</div>
+          <div class="log-info">
+            <span class="log-action">{{ l.action }}</span>
+            <span class="log-target">→ {{ l.target }}</span>
+          </div>
+          <div class="log-meta">
+            <span class="log-by">by {{ l.by }}</span>
+            <span class="log-time">{{ l.time }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

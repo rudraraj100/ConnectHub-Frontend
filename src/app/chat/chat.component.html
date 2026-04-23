@@ -1,0 +1,645 @@
+<div class="app-shell">
+
+  <!-- ─── Vertical Sidebar ─────────────────────────────────────── -->
+  <nav class="sidebar">
+    <div class="sidebar-brand"><span class="brand-text">CH</span></div>
+    <div class="nav-links">
+      <button class="nav-btn" [class.active]="activeTab==='home'"   (click)="activeTab='home'"   title="Home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </button>
+      <button class="nav-btn" [class.active]="activeTab==='people'" (click)="activeTab='people'" title="People">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </button>
+      <button class="nav-btn" [class.active]="activeTab==='chat'"   (click)="activeTab='chat'"   title="Chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        @if (totalUnread > 0) {
+          <span class="badge">{{ totalUnread > 9 ? '9+' : totalUnread }}</span>
+        }
+      </button>
+      <button class="nav-btn" [class.active]="activeTab==='files'"  (click)="activeTab='files'"  title="Files">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </button>
+    </div>
+    <div class="nav-bottom">
+      <button class="nav-btn" [class.active]="showSettings" (click)="openSettings()" title="Settings" id="settings-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      @if (isAdmin) {
+        <button class="nav-btn admin-btn" (click)="goAdmin()" title="Admin Panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </button>
+      }
+    </div>
+  </nav>
+
+  <!-- ─── Main Area ─────────────────────────────────────────────── -->
+  <div class="main-area">
+
+    <header class="top-header">
+      <h1 class="brand-full">Connect<span>Hub</span></h1>
+      <div class="search-wrap">
+        <svg class="search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search users, rooms and more…" class="global-search" id="global-search-input"/>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn notif-btn" title="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-dot"></span>
+        </button>
+        <div class="header-avatar" (click)="openProfile()" title="My Profile" id="profile-avatar-btn" style="cursor:pointer">
+          @if (avatarUrl) { <img [src]="avatarUrl" alt="avatar" class="avatar-img"/> }
+          @else { {{ avatarLetter }} }
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+
+      <!-- ══ HOME TAB ══════════════════════════════════════════════ -->
+      @if (activeTab === 'home') {
+        <div class="tab-panel">
+          <div class="home-panel">
+            <div class="home-welcome">
+              <div class="welcome-avatar">
+                @if (avatarUrl) { <img [src]="avatarUrl" class="avatar-img-lg"/> }
+                @else { {{ avatarLetter }} }
+              </div>
+              <div>
+                <h2>Good day, {{ fullName || username || 'there' }}! 👋</h2>
+                <p>Welcome back to ConnectHub.</p>
+                @if (isProfileLoading) { <span class="loading-chip">Syncing profile…</span> }
+              </div>
+            </div>
+            <div class="stat-cards">
+              <div class="stat-card">
+                <span class="stat-icon">👥</span>
+                <div><span class="stat-num">{{ contacts.length }}</span><span class="stat-label">Contacts</span></div>
+              </div>
+              <div class="stat-card">
+                <span class="stat-icon">🏠</span>
+                <div><span class="stat-num">{{ rooms.length }}</span><span class="stat-label">Rooms</span></div>
+              </div>
+              <div class="stat-card">
+                <span class="stat-icon">💬</span>
+                <div><span class="stat-num">{{ totalUnread }}</span><span class="stat-label">Unread</span></div>
+              </div>
+            </div>
+            <div class="quick-actions">
+              <button class="qa-btn" (click)="activeTab='people'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                Find People
+              </button>
+              <button class="qa-btn" (click)="activeTab='chat'; chatMode='room'">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                My Rooms
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ══ PEOPLE TAB ════════════════════════════════════════════ -->
+      @if (activeTab === 'people') {
+        <div class="tab-panel">
+          <div class="people-panel">
+            <div class="people-header">
+              <h2>People</h2>
+              <div class="people-search-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" [value]="peopleSearch"
+                       (input)="onPeopleSearch($any($event.target).value)"
+                       placeholder="Search users by username…"
+                       id="people-search-input"/>
+              </div>
+            </div>
+
+            @if (isPeopleLoading) {
+              <div class="loading-row"><div class="spinner"></div><span>Searching users…</span></div>
+            }
+            @if (!isPeopleLoading && peopleSearched && searchResults.length === 0) {
+              <div class="empty-tab" style="height:200px">
+                <div class="empty-icon">🔍</div><h3>No users found</h3><p>Try a different username</p>
+              </div>
+            }
+            @if (!peopleSearched && !peopleSearch) {
+              <p class="search-hint">Type a username to find people on ConnectHub</p>
+            }
+            <div class="people-grid">
+              @for (u of displayedPeople; track u.userId) {
+                <div class="person-card">
+                  <div class="person-avatar" [class]="getStatusClass(u.status)">
+                    @if (u.avatarUrl) { <img [src]="u.avatarUrl" class="avatar-img"/> }
+                    @else { {{ getAvatarLetter(u) }} }
+                  </div>
+                  <div class="person-info">
+                    <span class="person-name">{{ u.fullName || u.username }}</span>
+                    <span class="person-role">&#64;{{ u.username }}</span>
+                    <span class="person-status" [class]="'dot-' + (u.status || 'offline').toLowerCase()">
+                      {{ (u.status || 'offline').toLowerCase() }}
+                    </span>
+                  </div>
+                  <button class="msg-btn" (click)="messagePerson(u)">Message</button>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ══ CHAT TAB ══════════════════════════════════════════════ -->
+      @if (activeTab === 'chat') {
+        <div class="tab-panel chat-layout">
+
+          <!-- Left: Contact/Room List -->
+          <div class="chat-list-panel">
+            <div class="list-header">
+              <h2>Chat</h2>
+              <div class="mode-toggle">
+                <button [class.active]="chatMode==='individual'" (click)="chatMode='individual'" id="toggle-individual">Individual</button>
+                <button [class.active]="chatMode==='room'"       (click)="chatMode='room'"       id="toggle-room">Room Chat</button>
+              </div>
+            </div>
+            <div class="list-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" [(ngModel)]="searchQuery" placeholder="Search…" id="chat-search-input"/>
+            </div>
+
+            <!-- INDIVIDUAL MODE -->
+            @if (chatMode === 'individual') {
+              <div class="contact-list">
+                @if (contacts.length === 0) {
+                  <div class="list-empty">
+                    <div class="empty-icon-sm">👥</div>
+                    <p>No conversations yet.<br/>Go to <b>People</b> to find someone to chat with.</p>
+                  </div>
+                }
+                @for (c of filteredContacts; track c.id) {
+                  <div class="contact-item" [class.selected]="selectedContact?.id===c.id" (click)="selectContact(c)">
+                    <div class="ci-avatar" [class]="'status-' + c.status">{{ c.avatar }}</div>
+                    <div class="ci-info">
+                      <div class="ci-top"><span class="ci-name">{{ c.name }}</span><span class="ci-time">{{ c.time }}</span></div>
+                      <div class="ci-bottom">
+                        <span class="ci-msg">{{ c.lastMsg || 'Start a conversation' }}</span>
+                        @if (c.unread > 0) { <span class="ci-badge">{{ c.unread }}</span> }
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- ROOM MODE -->
+            @if (chatMode === 'room') {
+              <div class="room-list-header">
+                <span class="room-list-title">My Rooms</span>
+                <button class="create-room-btn" (click)="openCreateRoom()" id="create-room-btn" title="Create a new room">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+              </div>
+              <div class="contact-list">
+                @if (isLoadingRooms) {
+                  <div class="loading-row"><div class="spinner"></div><span>Loading rooms…</span></div>
+                }
+                @if (!isLoadingRooms && rooms.length === 0) {
+                  <div class="list-empty">
+                    <div class="empty-icon-sm">🏠</div>
+                    <p>No rooms yet.<br/>Click <b>+</b> to create your first room.</p>
+                  </div>
+                }
+                @for (r of filteredRooms; track r.roomId) {
+                  <div class="contact-item" [class.selected]="selectedRoom?.roomId===r.roomId" (click)="selectRoom(r)">
+                    <div class="room-icon" [style.background]="getRoomColor(r)">{{ getRoomInitial(r) }}</div>
+                    <div class="ci-info">
+                      <div class="ci-top">
+                        <span class="ci-name">{{ r.name }}</span>
+                        <span class="ci-role-badge" [class.admin-badge]="r.currentUserRole === 'ADMIN'">
+                          {{ r.currentUserRole }}
+                        </span>
+                      </div>
+                      <div class="ci-bottom">
+                        <span class="ci-msg">{{ r.memberCount }} members</span>
+                        @if (r.unreadCount > 0) { <span class="ci-badge">{{ r.unreadCount }}</span> }
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Center: Message Thread -->
+          @if (selectedContact || selectedRoom) {
+            <div class="message-panel">
+              <div class="msg-header">
+                <div class="msg-h-left">
+                  @if (selectedContact) {
+                    <div class="msg-h-avatar" [class]="'status-' + selectedContact.status">
+                      @if (selectedContact.avatarUrl) { <img [src]="selectedContact.avatarUrl" class="avatar-img"/> }
+                      @else { {{ selectedContact.avatar }} }
+                    </div>
+                  }
+                  @if (selectedRoom) {
+                    <div class="msg-h-avatar room-av" [style.background]="getRoomColor(selectedRoom)">
+                      {{ getRoomInitial(selectedRoom) }}
+                    </div>
+                  }
+                  <div>
+                    <div class="msg-h-name">{{ selectedContact?.name || selectedRoom?.name }}</div>
+                    <div class="msg-h-sub">
+                      @if (selectedContact) { {{ selectedContact.status }} }
+                      @if (selectedRoom) { {{ selectedRoom.memberCount }} members · {{ myRoomRole }} }
+                    </div>
+                  </div>
+                </div>
+                @if (selectedRoom) {
+                  <button class="leave-room-btn" (click)="leaveRoom()" title="Leave room">Leave</button>
+                }
+              </div>
+
+              <div class="messages-body">
+                @if (isLoadingMessages) {
+                  <div class="loading-row center"><div class="spinner"></div><span>Loading messages…</span></div>
+                }
+                @if (!isLoadingMessages && messages.length === 0) {
+                  <div class="no-messages">
+                    <div class="empty-icon-sm">💬</div>
+                    <p>No messages yet. Say hello!</p>
+                  </div>
+                }
+                @for (m of messages; track m.id) {
+                  <div class="msg-bubble" [class.mine]="m.mine">
+                    @if (!m.mine && m.avatar) {
+                      <div class="bubble-avatar">{{ m.avatar }}</div>
+                    }
+                    <div class="bubble-content">
+                      @if (!m.mine && m.sender) {
+                        <div class="bubble-sender">{{ m.sender }}</div>
+                      }
+                      <div class="bubble-text">{{ m.text }}</div>
+                      <div class="bubble-time">{{ m.time }}</div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="input-bar">
+                <button class="input-icon-btn" title="Emoji">😊</button>
+                <input type="text" [(ngModel)]="newMessage" placeholder="Type a message…"
+                       (keydown.enter)="sendMessage()" id="message-input" class="msg-input"/>
+                <button class="send-btn" (click)="sendMessage()" id="send-message-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+              </div>
+            </div>
+          } @else {
+            <div class="message-panel empty-state">
+              <div class="empty-icon">💬</div>
+              <h3>Select a conversation</h3>
+              <p>Choose a contact or room from the left panel</p>
+            </div>
+          }
+
+          <!-- Right Panel: Contact Info OR Room Members -->
+          @if (selectedContact) {
+            <div class="info-panel">
+              <div class="ip-avatar">
+                @if (selectedContact.avatarUrl) { <img [src]="selectedContact.avatarUrl" class="avatar-img-lg"/> }
+                @else { {{ selectedContact.avatar }} }
+              </div>
+              <div class="ip-name">{{ selectedContact.name }}</div>
+              <div class="ip-role">{{ selectedContact.role }}</div>
+              @if (selectedContact.email) {
+                <div class="ip-contact-detail"><label>Email</label><span>{{ selectedContact.email }}</span></div>
+              }
+            </div>
+          }
+
+          @if (selectedRoom && !selectedContact) {
+            <div class="info-panel room-info">
+              <div class="ip-avatar room-av" [style.background]="getRoomColor(selectedRoom)">
+                {{ getRoomInitial(selectedRoom) }}
+              </div>
+              <div class="ip-name">{{ selectedRoom.name }}</div>
+              <div class="ip-role">{{ selectedRoom.memberCount }} members</div>
+              @if (selectedRoom.description) {
+                <div class="ip-desc">{{ selectedRoom.description }}</div>
+              }
+              <div class="ip-section-title">Members</div>
+              @if (isLoadingMembers) {
+                <div class="loading-row"><div class="spinner"></div><span>Loading…</span></div>
+              }
+              <div class="member-list">
+                @for (m of roomMembers; track m.userId) {
+                  <div class="member-row">
+                    <div class="member-av" [class]="getStatusClass(m.status)">
+                      @if (m.avatarUrl) { <img [src]="m.avatarUrl" class="avatar-img-sm"/> }
+                      @else { {{ getMemberAvatarLetter(m) }} }
+                    </div>
+                    <div class="member-info">
+                      <span class="member-name">{{ m.fullName || m.username || m.userId }}</span>
+                      <span class="member-role-tag" [class.admin-tag]="m.role === 'ADMIN'">{{ m.role }}</span>
+                    </div>
+                    <!-- Admin actions — only shown to admins, not on themselves -->
+                    @if (myRoomRole === 'ADMIN' && m.userId !== userId) {
+                      <div class="member-actions">
+                        @if (m.role === 'MEMBER') {
+                          <button class="mem-action-btn promote-btn" (click)="makeAdmin(m.userId)" title="Make Admin">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                          </button>
+                        }
+                        @if (m.role === 'ADMIN') {
+                          <button class="mem-action-btn demote-btn" (click)="removeAdmin(m.userId)" title="Remove Admin">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                          </button>
+                        }
+                        <button class="mem-action-btn remove-btn" (click)="removeMemberFromRoom(m.userId)" title="Remove from room">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+        </div>
+      }
+
+      <!-- ══ FILES TAB ══════════════════════════════════════════════ -->
+      @if (activeTab === 'files') {
+        <div class="tab-panel">
+          <div class="empty-tab">
+            <div class="empty-icon">📁</div>
+            <h3>Files</h3>
+            <p>File sharing will be available soon.</p>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+</div>
+
+<!-- ════ Create Room Modal ════════════════════════════════════════ -->
+@if (showCreateRoom) {
+  <div class="modal-overlay" (click)="closeCreateRoom()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Create New Room</h3>
+        <button class="modal-close" (click)="closeCreateRoom()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <label class="field-label">Room Name *</label>
+        <input type="text" [(ngModel)]="newRoomName" placeholder="e.g. Design Team, Backend Devs…"
+               class="modal-input" id="new-room-name" maxlength="100"/>
+
+        <label class="field-label">Description</label>
+        <textarea [(ngModel)]="newRoomDesc" placeholder="What is this room about?"
+                  class="modal-input modal-textarea" rows="2"></textarea>
+
+        <label class="field-label">Add Members</label>
+        <div class="member-search-wrap">
+          <input type="text" [value]="memberSearch"
+                 (input)="onMemberSearchInput($any($event.target).value)"
+                 placeholder="Search by username…"
+                 class="modal-input" id="member-search-input"/>
+          @if (memberSearching) { <div class="spinner-sm"></div> }
+        </div>
+
+        <!-- Search results -->
+        @if (memberResults.length > 0) {
+          <div class="member-search-results">
+            @for (u of memberResults; track u.userId) {
+              <div class="member-result-row" (click)="addPendingMember(u)">
+                <div class="mr-avatar">
+                  @if (u.avatarUrl) { <img [src]="u.avatarUrl" class="avatar-img-sm"/> }
+                  @else { {{ getAvatarLetter(u) }} }
+                </div>
+                <div class="mr-info">
+                  <span>{{ u.fullName || u.username }}</span>
+                  <small>&#64;{{ u.username }}</small>
+                </div>
+                <span class="add-chip">+ Add</span>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Pending members (to be added) -->
+        @if (pendingMembers.length > 0) {
+          <div class="pending-members">
+            @for (p of pendingMembers; track p.userId) {
+              <div class="pending-chip">
+                <span>{{ p.fullName || p.username }}</span>
+                <button (click)="removePendingMember(p.userId)">✕</button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-cancel" (click)="closeCreateRoom()">Cancel</button>
+        <button class="btn-create" [disabled]="!newRoomName.trim() || isCreatingRoom"
+                (click)="submitCreateRoom()" id="submit-create-room">
+          @if (isCreatingRoom) { Creating… } @else { Create Room }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ════ Profile Panel ════════════════════════════════════════════ -->
+@if (showProfile) {
+  <div class="side-panel-overlay" (click)="closeProfile()">
+    <div class="side-panel" (click)="$event.stopPropagation()">
+      <div class="sp-header">
+        <span class="sp-title">My Profile</span>
+        <button class="modal-close" (click)="closeProfile()">✕</button>
+      </div>
+      <div class="sp-body">
+
+        <!-- Avatar block -->
+        <div class="profile-hero">
+          <div class="profile-hero-av">
+            @if (avatarUrl) { <img [src]="avatarUrl" class="avatar-img"/> }
+            @else { {{ avatarLetter }} }
+          </div>
+          <div class="profile-hero-badge" [class]="'badge-' + currentStatus.toLowerCase()">
+            {{ currentStatus }}
+          </div>
+        </div>
+
+        <div class="profile-name">{{ fullName || username }}</div>
+        <div class="profile-handle">&#64;{{ username }}</div>
+
+        <!-- Details -->
+        <div class="profile-details">
+          @if (email) {
+            <div class="pd-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
+              <span>{{ email }}</span>
+            </div>
+          }
+          @if (userLocation) {
+            <div class="pd-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>{{ userLocation }}</span>
+            </div>
+          }
+          @if (userPhone) {
+            <div class="pd-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.4 2 2 0 0 1 3.58 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91A16 16 0 0 0 16 17.09l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 24 18.18v-.73"/></svg>
+              <span>{{ userPhone }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- Quick presence from profile too -->
+        <div class="pd-section-title">Presence</div>
+        <div class="presence-pills">
+          @for (s of presenceOptions; track s.value) {
+            <button class="presence-pill" [class.active]="currentStatus === s.value"
+                    (click)="setStatus(s.value)">
+              <span class="presence-dot" [class]="'pd-' + s.value.toLowerCase()"></span>
+              {{ s.label }}
+            </button>
+          }
+        </div>
+
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ════ Settings Panel ═══════════════════════════════════════════ -->
+@if (showSettings) {
+  <div class="side-panel-overlay" (click)="closeSettings()">
+    <div class="side-panel settings-panel" (click)="$event.stopPropagation()">
+      <div class="sp-header">
+        <span class="sp-title">Settings</span>
+        <button class="modal-close" (click)="closeSettings()">✕</button>
+      </div>
+      <div class="sp-body">
+
+        <!-- ── Edit Profile ─────────────────────────────────────── -->
+        <div class="settings-section">
+          <div class="settings-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Edit Profile
+          </div>
+          <p class="settings-section-desc">Changes are saved directly to your account</p>
+
+          @if (profileSaveSuccess) {
+            <div class="report-success">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Profile updated successfully!
+            </div>
+          }
+
+          <div class="settings-form">
+            <label class="field-label">Full Name</label>
+            <input type="text" [(ngModel)]="editFullName" placeholder="Your full name"
+                   class="modal-input" id="edit-fullname-input"/>
+
+            <label class="field-label" style="margin-top:10px">Username</label>
+            <input type="text" [(ngModel)]="editUsername" placeholder="e.g. rudra_raj"
+                   class="modal-input" id="edit-username-input"/>
+
+            <label class="field-label" style="margin-top:10px">Bio</label>
+            <textarea [(ngModel)]="editBio" placeholder="Tell us about yourself…"
+                      class="modal-input modal-textarea" rows="3" id="edit-bio-input"></textarea>
+
+            <label class="field-label" style="margin-top:10px">Avatar URL</label>
+            <input type="text" [(ngModel)]="editAvatarUrl" placeholder="https://…"
+                   class="modal-input" id="edit-avatar-input"/>
+
+            <div class="edit-row">
+              <div class="edit-col">
+                <label class="field-label">Country</label>
+                <input type="text" [(ngModel)]="editCountry" placeholder="India"
+                       class="modal-input" id="edit-country-input"/>
+              </div>
+              <div class="edit-col">
+                <label class="field-label">City</label>
+                <input type="text" [(ngModel)]="editCity" placeholder="Kolkata"
+                       class="modal-input" id="edit-city-input"/>
+              </div>
+            </div>
+
+            <div class="edit-row">
+              <div class="edit-col" style="flex:0 0 90px">
+                <label class="field-label">Code</label>
+                <input type="text" [(ngModel)]="editCountryCode" placeholder="+91"
+                       class="modal-input" id="edit-cc-input"/>
+              </div>
+              <div class="edit-col">
+                <label class="field-label">Phone</label>
+                <input type="tel" [(ngModel)]="editPhone" placeholder="9876543210"
+                       class="modal-input" id="edit-phone-input"/>
+              </div>
+            </div>
+
+            <button class="btn-save-profile"
+                    [disabled]="isSavingProfile"
+                    (click)="saveProfile()" id="save-profile-btn">
+              @if (isSavingProfile) { Saving… } @else { Save Changes }
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Report a User ────────────────────────────────────── -->
+        <div class="settings-section">
+          <div class="settings-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Report a User
+          </div>
+          <p class="settings-section-desc">Report abusive or inappropriate behaviour</p>
+
+          @if (reportSuccess) {
+            <div class="report-success">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Report submitted. Our team will review it.
+            </div>
+          } @else {
+            <div class="settings-form">
+              <label class="field-label">Username to report</label>
+              <input type="text" [(ngModel)]="reportUsername" placeholder="&#64;username"
+                     class="modal-input" id="report-username-input"/>
+
+              <label class="field-label" style="margin-top:10px">Reason</label>
+              <div class="reason-chips">
+                @for (r of reportReasons; track r) {
+                  <button class="reason-chip" [class.selected]="reportReason === r"
+                          (click)="reportReason = r">{{ r }}</button>
+                }
+              </div>
+              <textarea [(ngModel)]="reportDetails" placeholder="Describe what happened (optional)…"
+                        class="modal-input modal-textarea" rows="3" style="margin-top:10px"></textarea>
+
+              <button class="btn-report" [disabled]="!reportUsername.trim() || !reportReason || isReporting"
+                      (click)="submitReport()" id="submit-report-btn">
+                @if (isReporting) { Submitting… } @else { Submit Report }
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- ── Account ──────────────────────────────────────────── -->
+        <div class="settings-section">
+          <div class="settings-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Account
+          </div>
+          <button class="btn-logout-settings" (click)="logout()" id="settings-logout-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Sign Out
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+}

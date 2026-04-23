@@ -20,9 +20,20 @@ export const routes: Routes = [
   },
   {
     path: 'dashboard',
+    redirectTo: 'chat',
+    pathMatch: 'full'
+  },
+  {
+    path: 'chat',
     loadComponent: () =>
-      import('./dashboard/dashboard.component').then(m => m.DashboardComponent),
-    title: 'Dashboard — ConnectHub'
+      import('./chat/chat.component').then(m => m.ChatComponent),
+    title: 'Chat — ConnectHub'
+  },
+  {
+    path: 'admin',
+    loadComponent: () =>
+      import('./admin/admin.component').then(m => m.AdminComponent),
+    title: 'Admin — ConnectHub'
   },
   {
     path: 'oauth2/callback',

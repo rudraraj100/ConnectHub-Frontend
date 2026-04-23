@@ -52,19 +52,21 @@ export class OAuth2CallbackComponent implements OnInit {
     this.authSvc.saveTokens(token, refreshToken);
 
     // 2️⃣ Fetch the full user profile (JWT is now in localStorage)
-    //    and store it so the Dashboard can display the username
+    //    and store it so the Chat UI can display the username
     this.authSvc.getProfile().subscribe({
       next: (res: any) => {
-        if (res?.data) {
-          // res.data is the UserProfileResponse from the backend
-          localStorage.setItem('current_user', JSON.stringify(res.data));
+        const userData = res?.data;
+        if (userData) {
+          localStorage.setItem('current_user', JSON.stringify(userData));
         }
-        this.router.navigate(['/dashboard'], { replaceUrl: true });
+        // Route: admin → /admin, everyone else → /chat
+        const email = userData?.email || '';
+        const dest = email === 'rudrar2002@gmail.com' ? '/admin' : '/chat';
+        this.router.navigate([dest], { replaceUrl: true });
       },
       error: () => {
-        // Profile fetch failed (rare) — still go to dashboard,
-        // it will show a blank username but won't redirect to /login
-        this.router.navigate(['/dashboard'], { replaceUrl: true });
+        // Profile fetch failed — still go to /chat (no username shown)
+        this.router.navigate(['/chat'], { replaceUrl: true });
       }
     });
   }
