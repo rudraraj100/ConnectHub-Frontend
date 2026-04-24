@@ -8,12 +8,22 @@ import { ChatService, UserProfile, RoomResponse, RoomMemberResponse, MessageResp
 interface Contact {
   id: string; name: string; avatar: string; status: string;
   lastMsg: string; time: string; unread: number;
+  userId?: string;   // backend userId for DM conversation
   role?: string; location?: string; phone?: string; email?: string;
   avatarUrl?: string;
+  username?: string; // @handle for display
 }
 interface LocalMessage {
   id: number | string; text: string; time: string; mine: boolean;
-  avatar?: string; sender?: string; senderId?: string;
+  avatar?: string;
+  /** Display name — full name preferred, falls back to @username */
+  sender?: string;
+  senderId?: string;
+  deliveryStatus?: 'SENT' | 'DELIVERED' | 'READ';
+  isEdited?: boolean;
+  replyToMessageId?: string;
+  replyPreview?: string;
+  isDeleted?: boolean;
 }
 
 @Component({
@@ -95,10 +105,20 @@ export class ChatComponent implements OnInit, OnDestroy {
   selectedRoom: RoomResponse | null = null;
   isLoadingRooms = false;
 
-  // ── Messages ──────────────────────────────────────────────────
+  // -- Messages --
   messages: LocalMessage[] = [];
   newMessage = '';
   isLoadingMessages = false;
+
+  // -- Message actions: edit / reply / search / context menu --
+  editingMessageId: string | null = null;
+  editContent = '';
+  replyTo: LocalMessage | null = null;
+  showMsgSearch = false;
+  msgSearchQuery = '';
+  msgSearchResults: LocalMessage[] = [];
+  activeContextMenu: string | null = null;
+
 
   // ── Room Members Panel (right side) ───────────────────────────
   roomMembers: RoomMemberResponse[] = [];
@@ -124,7 +144,9 @@ export class ChatComponent implements OnInit, OnDestroy {
   // ── Getters ───────────────────────────────────────────────────
   get filteredContacts() {
     return this.contacts.filter(c =>
-      c.name.toLowerCase().includes(this.searchQuery.toLowerCase()));
+      c.id !== this.userId && c.email !== this.email &&
+      c.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+    );
   }
   get filteredRooms() {
     return this.rooms.filter(r =>
@@ -145,6 +167,9 @@ export class ChatComponent implements OnInit, OnDestroy {
     // Restore from cache, then refresh
     const raw = localStorage.getItem('current_user');
     if (raw) { try { this.applyProfile(JSON.parse(raw)); } catch { /**/ } }
+
+    // ── Restore persisted DM contacts so previous chats are visible on reload
+    this.restoreContacts();
 
     this.isProfileLoading = true;
     this.chatSvc.getMyProfile().pipe(takeUntil(this.destroy$)).subscribe({
@@ -298,19 +323,27 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   private loadRoomMessages(roomId: string) {
     this.isLoadingMessages = true;
-    this.chatSvc.getRoomMessages(roomId).pipe(takeUntil(this.destroy$)).subscribe({
-      next: msgs => {
+    this.chatSvc.getMessages(roomId, 0, 50).pipe(takeUntil(this.destroy$)).subscribe({
+      next: res => {
+        const msgs = (res as any).content ?? [];
         // API returns newest-first; reverse for chronological display
-        this.messages = [...msgs].reverse().map(m => ({
-          id:       m.messageId,
-          text:     m.isDeleted ? '[Message deleted]' : m.content,
-          time:     this.formatTime(m.createdAt),
-          mine:     m.senderId === this.userId,
-          avatar:   m.senderName?.charAt(0).toUpperCase() || '?',
-          sender:   m.senderName?.split(' ')[0] || '',
-          senderId: m.senderId
+        this.messages = [...msgs].reverse().map((m: any) => ({
+          id:               m.messageId,
+          text:             m.isDeleted ? '[Message deleted]' : m.content,
+          time:             this.formatTime(m.sentAt || m.createdAt),
+          mine:             m.senderId === this.userId,
+          // Avatar letter is only used when no avatarUrl is available
+          avatar:           m.senderAvatarUrl ? undefined : (m.senderName?.charAt(0).toUpperCase() || '?'),
+          // Show full name; fallback to @username so something meaningful always appears
+          sender:           (m.senderName && !m.senderName.includes('-')) ? m.senderName : (m.senderUsername || 'Unknown'),
+          senderId:         m.senderId,
+          deliveryStatus:   (m.deliveryStatus as 'SENT' | 'DELIVERED' | 'READ') || 'SENT',
+          isEdited:         m.isEdited  || false,
+          isDeleted:        m.isDeleted || false,
+          replyToMessageId: m.replyToMessageId
         }));
         this.isLoadingMessages = false;
+        // Use a slightly longer timeout to ensure Angular has finished rendering
         this.scrollToBottom();
       },
       error: () => { this.isLoadingMessages = false; }
@@ -442,16 +475,21 @@ export class ChatComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ── Individual Contacts (People → Message) ────────────────────
+  // -- Individual Contacts (People -> Message) --
   selectContact(c: Contact) {
-    this.selectedContact = c;
-    this.selectedRoom    = null;
-    this.activeTab       = 'chat';
-    this.chatMode        = 'individual';
-    this.messages        = [
-      { id: 1, text: `Hi ${this.fullName || 'there'}! How are you?`, time: this.nowTime(), mine: false, avatar: c.avatar, sender: c.name.split(' ')[0] }
-    ];
+    this.selectedContact  = c;
+    this.selectedRoom     = null;
+    this.activeTab        = 'chat';
+    this.chatMode         = 'individual';
+    this.messages         = [];
+    this.replyTo          = null;
+    this.editingMessageId = null;
     c.unread = 0;
+    // Load persisted DM history from message-service
+    if (c.userId && this.userId) {
+      const dmId = this.getDmRoomId(c.userId);
+      this.loadRoomMessages(dmId);
+    }
   }
 
   messagePerson(u: UserProfile) {
@@ -460,7 +498,9 @@ export class ChatComponent implements OnInit, OnDestroy {
     else {
       const nc: Contact = {
         id:        u.userId,
+        userId:    u.userId,
         name:      u.fullName || u.username,
+        username:  u.username,
         avatar:    (u.fullName || u.username || '?').charAt(0).toUpperCase() +
                    ((u.fullName || u.username || '').split(' ')[1]?.charAt(0) || ''),
         status:    u.status?.toLowerCase() || 'offline',
@@ -474,36 +514,133 @@ export class ChatComponent implements OnInit, OnDestroy {
         avatarUrl: u.avatarUrl || ''
       };
       this.contacts.unshift(nc);
+      this.persistContacts();
       this.selectContact(nc);
     }
     this.activeTab = 'chat';
   }
 
-  // ── Send Message ──────────────────────────────────────────────
+  // -- Send Message (now uses message-service) --
   sendMessage() {
     if (!this.newMessage.trim()) return;
-
+    const text = this.newMessage.trim();
+    this.newMessage = '';
     if (this.selectedRoom) {
-      // Send to room via API
-      const text = this.newMessage.trim();
-      this.newMessage = '';
-      this.chatSvc.sendRoomMessage(this.selectedRoom.roomId, text)
+      const opts = this.replyTo ? { replyToMessageId: String(this.replyTo.id) } : undefined;
+      this.chatSvc.sendMessage(this.selectedRoom.roomId, text, opts)
         .pipe(takeUntil(this.destroy$)).subscribe(msg => {
           if (msg) {
             this.messages.push({
-              id: msg.messageId, text: msg.content,
-              time: this.formatTime(msg.createdAt), mine: true
+              id: (msg as any).messageId,
+              text: (msg as any).content,
+              time: this.formatTime((msg as any).sentAt || (msg as any).createdAt),
+              mine: true,
+              sender: this.fullName || this.username,
+              deliveryStatus: 'SENT',
+              replyToMessageId: (msg as any).replyToMessageId
             });
+            this.replyTo = null;
+            this.scrollToBottom();
+          }
+        });
+    } else if (this.selectedContact?.userId && this.userId) {
+      // DM: persist to message-service with a stable conversation ID
+      const dmId = this.getDmRoomId(this.selectedContact.userId);
+      const opts = this.replyTo ? { replyToMessageId: String(this.replyTo.id) } : undefined;
+      this.chatSvc.sendMessage(dmId, text, opts)
+        .pipe(takeUntil(this.destroy$)).subscribe(msg => {
+          if (msg) {
+            // Update lastMsg on the contact and persist
+            if (this.selectedContact) {
+              this.selectedContact.lastMsg = text;
+              this.selectedContact.time = this.nowTime();
+              this.persistContacts();
+            }
+            this.messages.push({
+              id: (msg as any).messageId,
+              text: (msg as any).content,
+              time: this.formatTime((msg as any).sentAt || (msg as any).createdAt),
+              mine: true,
+              sender: this.fullName || this.username,
+              deliveryStatus: 'SENT',
+              replyToMessageId: (msg as any).replyToMessageId
+            });
+            this.replyTo = null;
             this.scrollToBottom();
           }
         });
     } else {
-      // Local-only for individual chat (DM API will be added with message service)
-      this.messages.push({ id: Date.now(), text: this.newMessage.trim(), time: this.nowTime(), mine: true });
-      this.newMessage = '';
+      // Fallback: local-only (no userId known yet)
+      this.messages.push({ id: Date.now(), text, time: this.nowTime(), mine: true,
+        sender: this.fullName || this.username, deliveryStatus: 'SENT' });
       this.scrollToBottom();
     }
   }
+
+  // -- Edit Message --
+  startEdit(m: LocalMessage) {
+    if (!m.mine || m.isDeleted) return;
+    this.editingMessageId = String(m.id);
+    this.editContent = m.text;
+    this.activeContextMenu = null;
+  }
+  cancelEdit() { this.editingMessageId = null; this.editContent = ''; }
+  confirmEdit() {
+    if (!this.editingMessageId || !this.editContent.trim()) return;
+    const id = this.editingMessageId;
+    this.chatSvc.editMessage(id, this.editContent.trim())
+      .pipe(takeUntil(this.destroy$)).subscribe(() => {
+        const idx = this.messages.findIndex(m => String(m.id) === id);
+        if (idx !== -1) { this.messages[idx].text = this.editContent.trim(); this.messages[idx].isEdited = true; }
+        this.cancelEdit();
+      });
+  }
+
+  // -- Delete Message --
+  deleteOwnMessage(m: LocalMessage) {
+    if (!m.mine || m.isDeleted) return;
+    this.activeContextMenu = null;
+    this.chatSvc.deleteMessage(String(m.id))
+      .pipe(takeUntil(this.destroy$)).subscribe(ok => {
+        if (ok) {
+          const idx = this.messages.findIndex(x => x.id === m.id);
+          if (idx !== -1) { this.messages[idx].text = '[Message deleted]'; this.messages[idx].isDeleted = true; }
+        }
+      });
+  }
+
+  // -- Reply --
+  startReply(m: LocalMessage) { this.replyTo = m; this.activeContextMenu = null; this.editingMessageId = null; }
+  cancelReply() { this.replyTo = null; }
+
+  // -- Search in Room --
+  toggleMsgSearch() {
+    this.showMsgSearch = !this.showMsgSearch;
+    if (!this.showMsgSearch) { this.msgSearchQuery = ''; this.msgSearchResults = []; }
+  }
+  doMsgSearch() {
+    if (!this.selectedRoom || !this.msgSearchQuery.trim()) { this.msgSearchResults = []; return; }
+    this.chatSvc.searchMessages(this.selectedRoom.roomId, this.msgSearchQuery)
+      .pipe(takeUntil(this.destroy$)).subscribe(results => {
+        this.msgSearchResults = results.map((m: any) => ({
+          id: m.messageId, text: m.content, time: this.formatTime(m.sentAt),
+          mine: m.senderId === this.userId, sender: m.senderName, deliveryStatus: m.deliveryStatus
+        }));
+      });
+  }
+  toggleContextMenu(msgId: string) {
+    this.activeContextMenu = this.activeContextMenu === msgId ? null : msgId;
+  }
+  closeContextMenu() { this.activeContextMenu = null; }
+
+  deliveryIcon(status: string | undefined): 'read' | 'delivered' | 'sent' {
+    switch (status) {
+      case 'READ':      return 'read';
+      case 'DELIVERED': return 'delivered';
+      default:          return 'sent';
+    }
+  }
+
 
   // ── People tab search ─────────────────────────────────────────
   onPeopleSearch(keyword: string) {
@@ -556,11 +693,14 @@ export class ChatComponent implements OnInit, OnDestroy {
   private formatTime(iso: string): string {
     if (!iso) return '';
     try {
-      const d = new Date(iso);
+      // Handle both ISO string and LocalDateTime array from Spring
+      const d = Array.isArray(iso) ? new Date((iso as any)[0], (iso as any)[1]-1, (iso as any)[2], (iso as any)[3]||0, (iso as any)[4]||0) : new Date(iso);
       const h = d.getHours(), m = d.getMinutes();
       return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`;
     } catch { return ''; }
   }
+
+
 
   private nowTime(): string {
     const d = new Date();
@@ -569,9 +709,14 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   private scrollToBottom() {
+    // Two-step: first tick lets Angular render, second ensures layout is settled
     setTimeout(() => {
       const el = document.querySelector('.messages-body');
-      if (el) el.scrollTop = el.scrollHeight;
+      if (el) {
+        el.scrollTop = el.scrollHeight;
+        // Second pass for images or dynamic content that shifts layout
+        setTimeout(() => { el.scrollTop = el.scrollHeight; }, 120);
+      }
     }, 50);
   }
 
@@ -581,9 +726,45 @@ export class ChatComponent implements OnInit, OnDestroy {
       localStorage.removeItem('jwt_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('current_user');
+      // NOTE: intentionally keep 'ch_contacts' so conversations re-appear on next login
     }
     this.router.navigate(['/login']);
   }
 
   goAdmin() { this.router.navigate(['/admin']); }
+
+  getDmRoomId(otherUserId: string): string {
+    // Stable, sorted conversation key shared by both users
+    const ids = [this.userId, otherUserId].sort();
+    return `dm_${ids[0]}_${ids[1]}`;
+  }
+
+  // ── Contact Persistence ───────────────────────────────────────
+  /** Save the current DM contact list to localStorage. */
+  private persistContacts(): void {
+    if (!isPlatformBrowser(this.platform)) return;
+    try {
+      if (this.userId) {
+        localStorage.setItem(`ch_contacts_${this.userId}`, JSON.stringify(this.contacts));
+      }
+    } catch { /* quota exceeded — silent */ }
+  }
+
+  /** Restore DM contacts from localStorage on init. */
+  private restoreContacts(): void {
+    if (!isPlatformBrowser(this.platform)) return;
+    try {
+      // Try user-specific contacts first, fallback to legacy generic contacts if none found
+      const raw = localStorage.getItem(`ch_contacts_${this.userId}`) || localStorage.getItem('ch_contacts');
+      if (raw) {
+        const parsed: Contact[] = JSON.parse(raw);
+        // Merge: avoid duplicates by userId
+        parsed.forEach(saved => {
+          if (saved.id !== this.userId && saved.email !== this.email && !this.contacts.find(c => c.id === saved.id)) {
+            this.contacts.push(saved);
+          }
+        });
+      }
+    } catch { /* corrupted data — ignore */ }
+  }
 }

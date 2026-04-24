@@ -58,17 +58,24 @@ export interface MessageResponse {
   senderAvatar: string;
   content: string;
   type: string;
-  fileUrl: string;
-  isPinned: boolean;
+  mediaUrl: string;
+  replyToMessageId: string;
+  isEdited: boolean;
   isDeleted: boolean;
-  replyToId: string;
-  createdAt: string;
+  deliveryStatus: string;   // SENT | DELIVERED | READ
+  sentAt: string;
+  editedAt: string;
+  // legacy aliases kept for backward compat
+  fileUrl?: string;
+  isPinned?: boolean;
+  replyToId?: string;
+  createdAt?: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
 
-  private readonly GATEWAY  = 'http://localhost:8080';
+  private readonly GATEWAY     = 'http://localhost:8080';
   private readonly http     = inject(HttpClient);
   private readonly platform = inject(PLATFORM_ID);
 
@@ -191,7 +198,10 @@ export class ChatService {
       .pipe(map(res => res?.data ?? null), catchError(() => of(null)));
   }
 
-  /** Send a message to a room */
+  /**
+   * Send a message via room-service (legacy — kept for compatibility).
+   * Prefer sendMessage() which goes through message-service.
+   */
   sendRoomMessage(roomId: string, content: string): Observable<MessageResponse | null> {
     return this.http
       .post<any>(`${this.GATEWAY}/rooms/${roomId}/messages`,
@@ -200,7 +210,10 @@ export class ChatService {
       .pipe(map(res => res?.data ?? null), catchError(() => of(null)));
   }
 
-  /** Get paginated message history */
+  /**
+   * Get paginated message history via room-service (legacy).
+   * Prefer getMessages() which goes through message-service.
+   */
   getRoomMessages(roomId: string, page = 0, size = 30): Observable<MessageResponse[]> {
     return this.http
       .get<any>(`${this.GATEWAY}/rooms/${roomId}/messages?page=${page}&size=${size}`,
@@ -221,4 +234,83 @@ export class ChatService {
       .delete<any>(`${this.GATEWAY}/rooms/${roomId}/leave`, { headers: this.authHeaders() })
       .pipe(map(() => true), catchError(() => of(false)));
   }
+
+  // ── Message Service ─────────────────────────────────────────────
+  // All calls route through the API Gateway (/messages/**).
+  // CorsFilter (gateway) handles CORS. JwtGatewayFilter injects X-User-Id.
+  // message-service trusts X-User-Id from the gateway — never sent by the client.
+
+  /** Send a message through the dedicated message-service */
+  sendMessage(roomId: string, content: string, options?: {
+    type?: string; mediaUrl?: string; replyToMessageId?: string;
+  }): Observable<MessageResponse | null> {
+    return this.http
+      .post<any>(`${this.GATEWAY}/messages/room/${roomId}`,
+        { content, type: options?.type ?? 'TEXT', mediaUrl: options?.mediaUrl,
+          replyToMessageId: options?.replyToMessageId },
+        { headers: this.authHeaders() })
+      .pipe(map(res => res?.data ?? null), catchError(() => of(null)));
+  }
+
+  /** Get paginated message history from message-service */
+  getMessages(roomId: string, page = 0, size = 50): Observable<{ content: MessageResponse[]; totalElements: number; }> {
+    return this.http
+      .get<any>(`${this.GATEWAY}/messages/room/${roomId}?page=${page}&size=${size}`,
+        { headers: this.authHeaders() })
+      .pipe(
+        map(res => res?.data ?? { content: [], totalElements: 0 }),
+        catchError(() => of({ content: [], totalElements: 0 }))
+      );
+  }
+
+  /** Edit a message (sender only) */
+  editMessage(messageId: string, content: string): Observable<MessageResponse | null> {
+    return this.http
+      .put<any>(`${this.GATEWAY}/messages/${messageId}`,
+        { content },
+        { headers: this.authHeaders() })
+      .pipe(map(res => res?.data ?? null), catchError(() => of(null)));
+  }
+
+  /** Soft-delete a message (sender only) */
+  deleteMessage(messageId: string): Observable<boolean> {
+    return this.http
+      .delete<any>(`${this.GATEWAY}/messages/${messageId}`,
+        { headers: this.authHeaders() })
+      .pipe(map(() => true), catchError(() => of(false)));
+  }
+
+  /** Search messages within a room */
+  searchMessages(roomId: string, keyword: string): Observable<MessageResponse[]> {
+    if (!keyword.trim()) return of([]);
+    return this.http
+      .get<any>(`${this.GATEWAY}/messages/room/${roomId}/search?keyword=${encodeURIComponent(keyword)}`,
+        { headers: this.authHeaders() })
+      .pipe(map(res => res?.data ?? []), catchError(() => of([])));
+  }
+
+  /** Update delivery status: SENT | DELIVERED | READ */
+  updateDeliveryStatus(messageId: string, status: 'SENT' | 'DELIVERED' | 'READ'): Observable<any> {
+    return this.http
+      .put<any>(`${this.GATEWAY}/messages/${messageId}/status?status=${status}`,
+        {}, { headers: this.authHeaders() })
+      .pipe(catchError(() => of(null)));
+  }
+
+  /** Get unread messages since a timestamp */
+  getUnreadMessages(roomId: string, since: string): Observable<MessageResponse[]> {
+    return this.http
+      .get<any>(`${this.GATEWAY}/messages/room/${roomId}/unread?since=${encodeURIComponent(since)}`,
+        { headers: this.authHeaders() })
+      .pipe(map(res => res?.data ?? []), catchError(() => of([])));
+  }
+
+  /** Get total message count for a room */
+  getMessageCount(roomId: string): Observable<number> {
+    return this.http
+      .get<any>(`${this.GATEWAY}/messages/room/${roomId}/count`,
+        { headers: this.authHeaders() })
+      .pipe(map(res => res?.data ?? 0), catchError(() => of(0)));
+  }
 }
+

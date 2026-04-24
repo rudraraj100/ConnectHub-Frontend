@@ -247,41 +247,134 @@
                     <div class="msg-h-name">{{ selectedContact?.name || selectedRoom?.name }}</div>
                     <div class="msg-h-sub">
                       @if (selectedContact) { {{ selectedContact.status }} }
-                      @if (selectedRoom) { {{ selectedRoom.memberCount }} members · {{ myRoomRole }} }
+                      @if (selectedRoom) { {{ selectedRoom.memberCount }} members &middot; {{ myRoomRole }} }
                     </div>
                   </div>
                 </div>
-                @if (selectedRoom) {
-                  <button class="leave-room-btn" (click)="leaveRoom()" title="Leave room">Leave</button>
-                }
+                <div class="msg-h-actions">
+                  @if (selectedRoom) {
+                    <button class="icon-btn-sm" (click)="toggleMsgSearch()" title="Search messages">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </button>
+                    <button class="leave-room-btn" (click)="leaveRoom()" title="Leave room">Leave</button>
+                  }
+                </div>
               </div>
 
-              <div class="messages-body">
+
+              <!-- Search bar (toggled) -->
+              @if (showMsgSearch) {
+                <div class="msg-search-bar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input type="text" [(ngModel)]="msgSearchQuery" placeholder="Search in conversation…"
+                         (keydown.enter)="doMsgSearch()" (keydown.escape)="toggleMsgSearch()" class="msg-search-input" id="msg-search-input"/>
+                  <button class="icon-btn-sm" (click)="doMsgSearch()">Go</button>
+                  <button class="icon-btn-sm" (click)="toggleMsgSearch()">✕</button>
+                </div>
+              }
+              <!-- Search results overlay -->
+              @if (msgSearchResults.length > 0) {
+                <div class="search-results-panel">
+                  <div class="srp-header"><span>{{ msgSearchResults.length }} results</span><button (click)="msgSearchResults=[]" class="icon-btn-sm">✕</button></div>
+                  @for (r of msgSearchResults; track r.id) {
+                    <div class="srp-row">
+                      <span class="srp-sender">{{ r.sender || 'You' }}</span>
+                      <span class="srp-text">{{ r.text }}</span>
+                      <span class="srp-time">{{ r.time }}</span>
+                    </div>
+                  }
+                </div>
+              }
+
+              <div class="messages-body" (click)="closeContextMenu()">
                 @if (isLoadingMessages) {
                   <div class="loading-row center"><div class="spinner"></div><span>Loading messages…</span></div>
                 }
-                @if (!isLoadingMessages && messages.length === 0) {
+                @if (!isLoadingMessages && messages.length === 0 && selectedContact) {
+                  <div class="empty-conversation">
+                    <div class="ec-emoji">👋</div>
+                    <p class="ec-text">Send <strong>Hi</strong> to start a conversation with <strong>{{ selectedContact.name }}</strong></p>
+                  </div>
+                }
+                @if (!isLoadingMessages && messages.length === 0 && selectedRoom) {
                   <div class="no-messages">
                     <div class="empty-icon-sm">💬</div>
                     <p>No messages yet. Say hello!</p>
                   </div>
                 }
                 @for (m of messages; track m.id) {
-                  <div class="msg-bubble" [class.mine]="m.mine">
+                  <div class="msg-bubble" [class.mine]="m.mine" [class.deleted-msg]="m.isDeleted">
                     @if (!m.mine && m.avatar) {
                       <div class="bubble-avatar">{{ m.avatar }}</div>
                     }
                     <div class="bubble-content">
-                      @if (!m.mine && m.sender) {
-                        <div class="bubble-sender">{{ m.sender }}</div>
+                      <!-- Sender name only above received messages -->
+                      @if (!m.mine) {
+                        <div class="bubble-sender">
+                          {{ selectedContact ? selectedContact.name : m.sender }}
+                        </div>
                       }
-                      <div class="bubble-text">{{ m.text }}</div>
-                      <div class="bubble-time">{{ m.time }}</div>
+                      <!-- Reply preview -->
+                      @if (m.replyToMessageId) {
+                        <div class="reply-preview">↩ Replying to a message</div>
+                      }
+                      <!-- Inline edit mode -->
+                      @if (editingMessageId === ('' + m.id)) {
+                        <div class="edit-inline">
+                          <input [(ngModel)]="editContent" class="edit-input" (keydown.enter)="confirmEdit()" (keydown.escape)="cancelEdit()"/>
+                          <button class="edit-confirm-btn" (click)="confirmEdit()">Save</button>
+                          <button class="edit-cancel-btn" (click)="cancelEdit()">✕</button>
+                        </div>
+                      } @else {
+                        <div class="bubble-text" [class.deleted-text]="m.isDeleted">{{ m.text }}</div>
+                      }
+                      <div class="bubble-meta">
+                        <span class="bubble-time">{{ m.time }}</span>
+                        @if (m.isEdited && !m.isDeleted) { <span class="edited-label">(edited)</span> }
+                        @if (m.mine) {
+                          <span class="delivery-tick"
+                                [class.tick-sent]="deliveryIcon(m.deliveryStatus) === 'sent'"
+                                [class.tick-delivered]="deliveryIcon(m.deliveryStatus) === 'delivered'"
+                                [class.tick-read]="deliveryIcon(m.deliveryStatus) === 'read'"
+                                [title]="m.deliveryStatus || 'SENT'">
+                            @if (deliveryIcon(m.deliveryStatus) === 'sent') { ✓ }
+                            @else { ✓✓ }
+                          </span>
+                        }
+                      </div>
                     </div>
+                    <!-- Context menu for own messages -->
+                    @if (m.mine && !m.isDeleted) {
+                      <div class="bubble-actions">
+                        <button class="ba-btn" (click)="$event.stopPropagation(); toggleContextMenu('' + m.id)" title="Actions">⋯</button>
+                        @if (activeContextMenu === ('' + m.id)) {
+                          <div class="ctx-menu">
+                            <button (click)="startReply(m)">↩ Reply</button>
+                            <button (click)="startEdit(m)">✏ Edit</button>
+                            <button class="ctx-delete" (click)="deleteOwnMessage(m)">🗑 Delete</button>
+                          </div>
+                        }
+                      </div>
+                    }
+                    @if (!m.mine) {
+                      <div class="bubble-actions">
+                        <button class="ba-btn" (click)="$event.stopPropagation(); startReply(m)" title="Reply">↩</button>
+                      </div>
+                    }
                   </div>
                 }
               </div>
 
+              <!-- Reply bar -->
+              @if (replyTo) {
+                <div class="reply-bar">
+                  <div class="reply-bar-content">
+                    <span class="reply-bar-label">↩ Replying to <b>{{ replyTo.mine ? 'yourself' : replyTo.sender }}</b></span>
+                    <span class="reply-bar-preview">{{ replyTo.text | slice:0:60 }}{{ replyTo.text.length > 60 ? '…' : '' }}</span>
+                  </div>
+                  <button class="reply-bar-close" (click)="cancelReply()">✕</button>
+                </div>
+              }
               <div class="input-bar">
                 <button class="input-icon-btn" title="Emoji">😊</button>
                 <input type="text" [(ngModel)]="newMessage" placeholder="Type a message…"
