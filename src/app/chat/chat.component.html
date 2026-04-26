@@ -175,7 +175,16 @@
                 }
                 @for (c of filteredContacts; track c.id) {
                   <div class="contact-item" [class.selected]="selectedContact?.id===c.id" (click)="selectContact(c)">
-                    <div class="ci-avatar" [class]="'status-' + c.status">{{ c.avatar }}</div>
+                    <div class="ci-avatar-wrap">
+                      <div class="ci-avatar">{{ c.avatar }}</div>
+                      <!-- Live presence dot — updates from PresenceService.presence$ -->
+                      <span class="presence-dot"
+                            [class.dot-online]="(presenceMap.get(c.userId ?? '')?.status ?? 'OFFLINE') === 'ONLINE'"
+                            [class.dot-away]="(presenceMap.get(c.userId ?? '')?.status ?? 'OFFLINE') === 'AWAY'"
+                            [class.dot-offline]="!(presenceMap.get(c.userId ?? '')?.status) || (presenceMap.get(c.userId ?? '')?.status) === 'OFFLINE'"
+                            [title]="presenceMap.get(c.userId ?? '')?.status ?? 'OFFLINE'">
+                      </span>
+                    </div>
                     <div class="ci-info">
                       <div class="ci-top"><span class="ci-name">{{ c.name }}</span><span class="ci-time">{{ c.time }}</span></div>
                       <div class="ci-bottom">
@@ -233,9 +242,16 @@
               <div class="msg-header">
                 <div class="msg-h-left">
                   @if (selectedContact) {
-                    <div class="msg-h-avatar" [class]="'status-' + selectedContact.status">
-                      @if (selectedContact.avatarUrl) { <img [src]="selectedContact.avatarUrl" class="avatar-img"/> }
-                      @else { {{ selectedContact.avatar }} }
+                    <div class="msg-h-avatar-wrap">
+                      <div class="msg-h-avatar">
+                        @if (selectedContact.avatarUrl) { <img [src]="selectedContact.avatarUrl" class="avatar-img"/> }
+                        @else { {{ selectedContact.avatar }} }
+                      </div>
+                      <span class="presence-dot presence-dot-lg"
+                            [class.dot-online]="(presenceMap.get(selectedContact.userId ?? '')?.status ?? 'OFFLINE') === 'ONLINE'"
+                            [class.dot-away]="(presenceMap.get(selectedContact.userId ?? '')?.status ?? 'OFFLINE') === 'AWAY'"
+                            [class.dot-offline]="!(presenceMap.get(selectedContact.userId ?? '')?.status) || (presenceMap.get(selectedContact.userId ?? '')?.status) === 'OFFLINE'">
+                      </span>
                     </div>
                   }
                   @if (selectedRoom) {
@@ -246,7 +262,14 @@
                   <div>
                     <div class="msg-h-name">{{ selectedContact?.name || selectedRoom?.name }}</div>
                     <div class="msg-h-sub">
-                      @if (selectedContact) { {{ selectedContact.status }} }
+                      @if (selectedContact) {
+                        <span class="live-status-label"
+                              [class.label-online]="(presenceMap.get(selectedContact.userId ?? '')?.status ?? 'OFFLINE') === 'ONLINE'"
+                              [class.label-away]="(presenceMap.get(selectedContact.userId ?? '')?.status ?? 'OFFLINE') === 'AWAY'"
+                              [class.label-offline]="!(presenceMap.get(selectedContact.userId ?? '')?.status) || (presenceMap.get(selectedContact.userId ?? '')?.status) === 'OFFLINE'">
+                          {{ presenceMap.get(selectedContact.userId ?? '')?.status ?? 'Offline' | titlecase }}
+                        </span>
+                      }
                       @if (selectedRoom) { {{ selectedRoom.memberCount }} members &middot; {{ myRoomRole }} }
                     </div>
                   </div>

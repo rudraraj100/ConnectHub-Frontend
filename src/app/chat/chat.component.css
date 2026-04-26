@@ -1212,3 +1212,67 @@
   background: rgba(239,68,68,0.4);
   transform: scale(1.1);
 }
+
+/* ── Presence Dots ────────────────────────────────────────────────── */
+
+/* Wrapper for avatar + dot in contact list */
+.ci-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.ci-avatar-wrap .ci-avatar {
+  /* ci-avatar already defined — just ensure no margin conflict */
+  margin: 0;
+}
+
+/* Wrapper for avatar + dot in chat header */
+.msg-h-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.msg-h-avatar-wrap .msg-h-avatar {
+  margin: 0;
+}
+
+/* Base dot */
+.presence-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #1a0a2e;   /* matches sidebar bg */
+  background: #6b7280;         /* default OFFLINE grey */
+  transition: background .3s;
+}
+
+/* Larger dot for chat header avatar */
+.presence-dot-lg {
+  width: 13px;
+  height: 13px;
+  bottom: 0;
+  right: 0;
+}
+
+/* Status colours */
+.dot-online  { background: #22c55e; animation: pulse-online 2s infinite; }
+.dot-away    { background: #f59e0b; }
+.dot-offline { background: #6b7280; animation: none; }
+
+@keyframes pulse-online {
+  0%   { box-shadow: 0 0 0 0 rgba(34,197,94,.5); }
+  70%  { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
+
+/* ── Live Status Label (chat header sub-line) ─────────────────────── */
+.live-status-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .3px;
+  text-transform: capitalize;
+}
+.label-online  { color: #22c55e; }
+.label-away    { color: #f59e0b; }
+.label-offline { color: rgba(255,255,255,.4); }

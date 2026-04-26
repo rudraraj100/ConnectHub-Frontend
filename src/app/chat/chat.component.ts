@@ -2,9 +2,10 @@ import { Component, OnInit, OnDestroy, inject, PLATFORM_ID, HostListener } from 
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil, timer } from 'rxjs';
 import { ChatService, UserProfile, RoomResponse, RoomMemberResponse, MessageResponse } from './chat.service';
 import { MediaService, MediaFile } from './media.service';
+import { PresenceService } from './presence.service';
 
 interface Contact {
   id: string; name: string; avatar: string; status: string;
@@ -43,7 +44,11 @@ export class ChatComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private searchSub$       = new Subject<string>();
   private memberSearchSub$ = new Subject<string>();
-  private mediaSvc  = inject(MediaService);
+  private mediaSvc    = inject(MediaService);
+  private presenceSvc = inject(PresenceService);
+
+  /** Exposes the presence map to the template */
+  get presenceMap() { return this.presenceSvc.presence$.value; }
 
   // ── Current user ──────────────────────────────────────────────
   private readonly GATEWAY = 'http://localhost:8080';
@@ -208,12 +213,28 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     // Load rooms immediately
     this.loadMyRooms();
+
+    // ── Presence ───────────────────────────────────────────────────
+    // 1. Send heartbeat immediately → writes this user's key to Redis
+    this.presenceSvc.startHeartbeat();
+
+    // 2. Wait 3 s for all users' heartbeats to land, then fetch contact dots
+    timer(3_000).pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.refreshPresence());
+
+    // 3. Keep dots fresh — re-fetch every 30 s
+    timer(30_000, 30_000)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.refreshPresence());
   }
 
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
     this.chatSvc.updateStatus('AWAY').subscribe();
+    // Mark OFFLINE and stop heartbeat on component teardown
+    this.presenceSvc.setStatus('OFFLINE').subscribe();
+    this.presenceSvc.stopHeartbeat();
   }
 
   private applyProfile(u: any) {
@@ -546,6 +567,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.contacts.unshift(nc);
       this.persistContacts();
       this.selectContact(nc);
+      this.refreshPresence();  // fetch presence for the newly added contact
     }
     this.activeTab = 'chat';
   }
@@ -876,6 +898,18 @@ export class ChatComponent implements OnInit, OnDestroy {
         });
       }
     } catch { /* corrupted data — ignore */ }
+  }
+
+  /** Fetch bulk presence for all known contacts and refresh the map. */
+  private refreshPresence(): void {
+    const ids = this.contacts
+      .map(c => c.userId)
+      .filter((id): id is string => !!id && id !== this.userId);
+    if (ids.length) {
+      this.presenceSvc.loadBulk(ids)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe();
+    }
   }
 
   // ── Lightbox ──────────────────────────────────────────────────
