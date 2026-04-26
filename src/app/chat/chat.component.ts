@@ -1,11 +1,12 @@
 import { Component, OnInit, OnDestroy, inject, PLATFORM_ID, HostListener } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { CommonModule, isPlatformBrowser, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil, timer } from 'rxjs';
 import { ChatService, UserProfile, RoomResponse, RoomMemberResponse, MessageResponse } from './chat.service';
 import { MediaService, MediaFile } from './media.service';
 import { PresenceService } from './presence.service';
+import { NotificationService, AppNotification } from './notification.service';
 
 interface Contact {
   id: string; name: string; avatar: string; status: string;
@@ -33,7 +34,7 @@ interface LocalMessage {
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, DatePipe],
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.css']
 })
@@ -44,11 +45,16 @@ export class ChatComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private searchSub$       = new Subject<string>();
   private memberSearchSub$ = new Subject<string>();
-  private mediaSvc    = inject(MediaService);
-  private presenceSvc = inject(PresenceService);
+  private mediaSvc        = inject(MediaService);
+  private presenceSvc     = inject(PresenceService);
+  private notifSvc        = inject(NotificationService);
 
   /** Exposes the presence map to the template */
   get presenceMap() { return this.presenceSvc.presence$.value; }
+
+  /** Exposes notification list to the template */
+  get notifications()  { return this.notifSvc.notifications$.value; }
+  get unreadNotifCount() { return this.notifSvc.unreadCount$.value; }
 
   // ── Current user ──────────────────────────────────────────────
   private readonly GATEWAY = 'http://localhost:8080';
@@ -64,9 +70,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   isProfileLoading = false;
   currentStatus: 'ONLINE' | 'AWAY' | 'DND' | 'INVISIBLE' = 'ONLINE';
 
-  // ── Panels ────────────────────────────────────────────────────
-  showProfile  = false;
-  showSettings = false;
+  // ── Panels ──────────────────────────────────────────────
+  showProfile       = false;
+  showSettings      = false;
+  showNotifications = false;
 
   // ── Presence options ──────────────────────────────────────────
   readonly presenceOptions = [
@@ -226,6 +233,9 @@ export class ChatComponent implements OnInit, OnDestroy {
     timer(30_000, 30_000)
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => this.refreshPresence());
+
+    // ── Notifications: load + poll every 30 s ───────────────────
+    this.notifSvc.startPolling();
   }
 
   ngOnDestroy() {
@@ -236,6 +246,17 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.presenceSvc.setStatus('OFFLINE').subscribe();
     this.presenceSvc.stopHeartbeat();
   }
+
+  // ── Notification helpers ────────────────────────────────
+  openNotifications(): void {
+    this.showNotifications = !this.showNotifications;
+    this.showProfile  = false;
+    this.showSettings = false;
+  }
+  closeNotifications(): void { this.showNotifications = false; }
+  onMarkAsRead(id: number):    void { this.notifSvc.markAsRead(id); }
+  onMarkAllRead():             void { this.notifSvc.markAllRead(); }
+  onDeleteNotif(id: number):   void { this.notifSvc.deleteNotification(id); }
 
   private applyProfile(u: any) {
     this.userId      = u?.userId     || '';
