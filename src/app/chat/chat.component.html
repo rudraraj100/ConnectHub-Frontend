@@ -326,7 +326,24 @@
                           <button class="edit-cancel-btn" (click)="cancelEdit()">✕</button>
                         </div>
                       } @else {
-                        <div class="bubble-text" [class.deleted-text]="m.isDeleted">{{ m.text }}</div>
+                        <div class="bubble-text" [class.deleted-text]="m.isDeleted">
+                          @if (m.mediaUrl) {
+                            @if (m.mediaType === 'IMAGE') {
+                              <img [src]="resolveMediaUrl(m.mediaUrl)" class="bubble-img"
+                                   (click)="$event.stopPropagation(); openLightbox(m.mediaUrl!)"
+                                   title="Click to expand"/>
+                            } @else if (m.mediaType === 'VIDEO') {
+                              <video [src]="resolveMediaUrl(m.mediaUrl)" controls class="bubble-video"></video>
+                            }
+                            <!-- Only show text if it's a real caption, not a placeholder -->
+                            @if (!m.isDeleted && m.text !== '[Image]' && m.text !== '[Video]') {
+                              <span class="bubble-caption">{{ m.text }}</span>
+                            }
+                            @if (m.isDeleted) { {{ m.text }} }
+                          } @else {
+                            {{ m.text }}
+                          }
+                        </div>
                       }
                       <div class="bubble-meta">
                         <span class="bubble-time">{{ m.time }}</span>
@@ -375,12 +392,41 @@
                   <button class="reply-bar-close" (click)="cancelReply()">✕</button>
                 </div>
               }
+
+              <!-- File Preview Bar -->
+              @if (selectedFile) {
+                <div class="file-preview-bar">
+                  <div class="fp-preview">
+                    @if (filePreview) { <img [src]="filePreview" class="fp-thumb"/> }
+                    @else { <div class="fp-icon">📄</div> }
+                    <div class="fp-info">
+                      <span class="fp-name">{{ selectedFile.name }}</span>
+                      <span class="fp-size">{{ (selectedFile.size / 1024).toFixed(1) }} KB</span>
+                    </div>
+                  </div>
+                  <button class="fp-cancel" (click)="cancelFile()">✕</button>
+                </div>
+              }
+
               <div class="input-bar">
                 <button class="input-icon-btn" title="Emoji">😊</button>
+                
+                <!-- Attachment -->
+                <button class="input-icon-btn attachment-btn" (click)="fileInput.click()" title="Attach photo or video">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                </button>
+                <input type="file" #fileInput id="file-input-hidden"
+                       (change)="onFileSelected($event)" style="display:none"/>
+
                 <input type="text" [(ngModel)]="newMessage" placeholder="Type a message…"
-                       (keydown.enter)="sendMessage()" id="message-input" class="msg-input"/>
-                <button class="send-btn" (click)="sendMessage()" id="send-message-btn">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                       (keydown.enter)="selectedFile ? uploadAndSend() : sendMessage()" id="message-input" class="msg-input"/>
+                
+                <button class="send-btn" (click)="selectedFile ? uploadAndSend() : sendMessage()" id="send-message-btn">
+                  @if (selectedFile) {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  }
                 </button>
               </div>
             </div>
@@ -400,10 +446,33 @@
                 @else { {{ selectedContact.avatar }} }
               </div>
               <div class="ip-name">{{ selectedContact.name }}</div>
-              <div class="ip-role">{{ selectedContact.role }}</div>
+              <div class="ip-role">{{ selectedContact.role || 'Member' }}</div>
               @if (selectedContact.email) {
                 <div class="ip-contact-detail"><label>Email</label><span>{{ selectedContact.email }}</span></div>
               }
+
+              <!-- Media Gallery for DM -->
+              <div class="ip-section-title media-title">
+                <span>Media ({{ roomMedia.length }})</span>
+              </div>
+              <div class="media-grid">
+                @if (isMediaLoading) {
+                  <div class="loading-grid"><div class="spinner-sm"></div></div>
+                }
+                @for (m of roomMedia | slice:0:6; track m.mediaId) {
+                  <div class="media-item" (click)="openLightbox(m.url)">
+                    @if (m.mimeType.startsWith('image/')) {
+                      <img [src]="resolveMediaUrl(m.thumbnailUrl || m.url)" alt="media"/>
+                    } @else {
+                      <div class="video-thumb"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+                    }
+                    <div class="media-item-overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div>
+                  </div>
+                }
+                @if (!isMediaLoading && roomMedia.length === 0) {
+                  <p class="no-media-text">No media shared yet</p>
+                }
+              </div>
             </div>
           }
 
@@ -451,6 +520,30 @@
                       </div>
                     }
                   </div>
+                }
+              </div>
+
+              <!-- Media Gallery -->
+              <div class="ip-section-title media-title">
+                <span>Media ({{ roomMedia.length }})</span>
+                <a href="javascript:void(0)" class="see-all">See all ›</a>
+              </div>
+              <div class="media-grid">
+                @if (isMediaLoading) {
+                  <div class="loading-grid"><div class="spinner-sm"></div></div>
+                }
+                @for (m of roomMedia | slice:0:6; track m.mediaId) {
+                  <div class="media-item" (click)="openLightbox(m.url)">
+                    @if (m.mimeType.startsWith('image/')) {
+                      <img [src]="resolveMediaUrl(m.thumbnailUrl || m.url)" alt="media"/>
+                    } @else {
+                      <div class="video-thumb"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+                    }
+                    <div class="media-item-overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div>
+                  </div>
+                }
+                @if (!isMediaLoading && roomMedia.length === 0) {
+                  <p class="no-media-text">No media shared yet</p>
                 }
               </div>
             </div>
@@ -733,6 +826,20 @@
         </div>
 
       </div>
+    </div>
+  </div>
+}
+
+<!-- ════ Image Lightbox ═══════════════════════════════════════════ -->
+@if (lightboxUrl) {
+  <div class="lightbox-overlay" (click)="closeLightbox()" id="lightbox-overlay">
+    <button class="lightbox-close" (click)="closeLightbox()" title="Close (Esc)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+    <div class="lightbox-content" (click)="$event.stopPropagation()">
+      <img [src]="lightboxUrl" class="lightbox-img" alt="Full size image"/>
     </div>
   </div>
 }

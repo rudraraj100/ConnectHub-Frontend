@@ -1,9 +1,10 @@
-import { Component, OnInit, OnDestroy, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, PLATFORM_ID, HostListener } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { ChatService, UserProfile, RoomResponse, RoomMemberResponse, MessageResponse } from './chat.service';
+import { MediaService, MediaFile } from './media.service';
 
 interface Contact {
   id: string; name: string; avatar: string; status: string;
@@ -24,6 +25,8 @@ interface LocalMessage {
   replyToMessageId?: string;
   replyPreview?: string;
   isDeleted?: boolean;
+  mediaUrl?: string;
+  mediaType?: 'IMAGE' | 'VIDEO' | 'FILE';
 }
 
 @Component({
@@ -40,8 +43,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private searchSub$       = new Subject<string>();
   private memberSearchSub$ = new Subject<string>();
+  private mediaSvc  = inject(MediaService);
 
   // ── Current user ──────────────────────────────────────────────
+  private readonly GATEWAY = 'http://localhost:8080';
   userId       = '';
   username     = '';
   fullName     = '';
@@ -141,6 +146,15 @@ export class ChatComponent implements OnInit, OnDestroy {
   isPeopleLoading  = false;
   peopleSearched   = false;
 
+  // ── Media ─────────────────────────────────────────────────────
+  roomMedia: MediaFile[] = [];
+  isMediaLoading = false;
+  selectedFile: File | null = null;
+  filePreview: string | null = null;
+
+  // ── Lightbox ──────────────────────────────────────────────────
+  lightboxUrl: string | null = null;
+
   // ── Getters ───────────────────────────────────────────────────
   get filteredContacts() {
     return this.contacts.filter(c =>
@@ -174,7 +188,11 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.isProfileLoading = true;
     this.chatSvc.getMyProfile().pipe(takeUntil(this.destroy$)).subscribe({
       next: p => {
-        if (p) { localStorage.setItem('current_user', JSON.stringify(p)); this.applyProfile(p); }
+        if (p) {
+          // Always persist fresh profile — overwrites any stale cached avatarUrl
+          localStorage.setItem('current_user', JSON.stringify(p));
+          this.applyProfile(p);
+        }
         this.isProfileLoading = false;
       },
       error: () => { this.isProfileLoading = false; }
@@ -318,6 +336,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.messages        = [];
     this.loadRoomMessages(r.roomId);
     this.loadRoomMembers(r.roomId);
+    this.loadRoomMedia(r.roomId);
     this.chatSvc.markRoomAsRead(r.roomId).subscribe();
   }
 
@@ -340,7 +359,9 @@ export class ChatComponent implements OnInit, OnDestroy {
           deliveryStatus:   (m.deliveryStatus as 'SENT' | 'DELIVERED' | 'READ') || 'SENT',
           isEdited:         m.isEdited  || false,
           isDeleted:        m.isDeleted || false,
-          replyToMessageId: m.replyToMessageId
+          replyToMessageId: m.replyToMessageId,
+          mediaUrl:         m.mediaUrl || undefined,
+          mediaType:        m.mediaType || undefined
         }));
         this.isLoadingMessages = false;
         // Use a slightly longer timeout to ensure Angular has finished rendering
@@ -355,6 +376,14 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.chatSvc.getRoomMembers(roomId).pipe(takeUntil(this.destroy$)).subscribe({
       next: members => { this.roomMembers = members; this.isLoadingMembers = false; },
       error: ()     => { this.isLoadingMembers = false; }
+    });
+  }
+
+  private loadRoomMedia(roomId: string) {
+    this.isMediaLoading = true;
+    this.mediaSvc.getRoomMedia(roomId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: media => { this.roomMedia = media; this.isMediaLoading = false; },
+      error: () => { this.isMediaLoading = false; }
     });
   }
 
@@ -489,6 +518,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (c.userId && this.userId) {
       const dmId = this.getDmRoomId(c.userId);
       this.loadRoomMessages(dmId);
+      this.loadRoomMedia(dmId);
     }
   }
 
@@ -518,6 +548,86 @@ export class ChatComponent implements OnInit, OnDestroy {
       this.selectContact(nc);
     }
     this.activeTab = 'chat';
+  }
+
+  // -- File Upload Logic --
+  onFileSelected(event: any) {
+    const file: File = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate type — accept images and videos only
+    const isImage = file.type.startsWith('image/');
+    const isVideo = file.type.startsWith('video/');
+    if (!isImage && !isVideo) {
+      alert(`Unsupported file type: ${file.type || 'unknown'}.\nPlease select an image or video file.`);
+      // Reset input so user can try again
+      event.target.value = '';
+      return;
+    }
+
+    this.selectedFile = file;
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = () => this.filePreview = reader.result as string;
+    reader.readAsDataURL(file);
+  }
+
+  cancelFile() {
+    this.selectedFile = null;
+    this.filePreview = null;
+  }
+
+  uploadAndSend() {
+    if (!this.selectedFile) return;
+
+    // Safely resolve roomId — never proceed with null/undefined
+    let roomId: string | null = null;
+    if (this.selectedRoom) {
+      roomId = this.selectedRoom.roomId;
+    } else if (this.selectedContact?.userId) {
+      roomId = this.getDmRoomId(this.selectedContact.userId);
+    }
+
+    if (!roomId) {
+      alert('Please open a conversation before uploading.');
+      return;
+    }
+
+    const resolvedRoomId = roomId; // capture for use inside callbacks
+
+    this.mediaSvc.upload(this.selectedFile, resolvedRoomId).subscribe({
+      next: media => {
+        const text = this.newMessage.trim() ||
+                     (media.mimeType.startsWith('image/') ? '[Image]' : '[Video]');
+        this.newMessage = '';
+        this.cancelFile();
+
+        this.chatSvc.sendMessage(resolvedRoomId, text, {
+          mediaUrl: media.url,
+          mediaType: media.mimeType.startsWith('image/') ? 'IMAGE' : 'VIDEO'
+        }).subscribe(msg => {
+          if (msg) {
+            this.messages.push({
+              id: (msg as any).messageId,
+              text: (msg as any).content,
+              time: this.formatTime((msg as any).sentAt || (msg as any).createdAt),
+              mine: true,
+              sender: this.fullName || this.username,
+              deliveryStatus: 'SENT',
+              mediaUrl: (msg as any).mediaUrl,
+              mediaType: (msg as any).mediaType
+            });
+            this.loadRoomMedia(resolvedRoomId);
+            this.scrollToBottom();
+          }
+        });
+      },
+      error: err => {
+        console.error('Upload failed', err);
+        alert('Upload failed. Please try again.');
+      }
+    });
   }
 
   // -- Send Message (now uses message-service) --
@@ -766,5 +876,30 @@ export class ChatComponent implements OnInit, OnDestroy {
         });
       }
     } catch { /* corrupted data — ignore */ }
+  }
+
+  // ── Lightbox ──────────────────────────────────────────────────
+  openLightbox(url: string) {
+    this.lightboxUrl = this.resolveMediaUrl(url);
+  }
+
+  closeLightbox() {
+    this.lightboxUrl = null;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey() {
+    if (this.lightboxUrl) this.closeLightbox();
+  }
+
+  /**
+   * Resolves a media URL to an absolute URL via the gateway.
+   * Old messages stored relative paths (/media/view/...) before this fix.
+   * New uploads store absolute paths (http://localhost:8080/media/view/...).
+   */
+  resolveMediaUrl(url: string | null | undefined): string {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;          // already absolute
+    return `${this.GATEWAY}${url}`;                  // prefix gateway base
   }
 }

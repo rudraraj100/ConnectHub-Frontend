@@ -242,11 +242,12 @@ export class ChatService {
 
   /** Send a message through the dedicated message-service */
   sendMessage(roomId: string, content: string, options?: {
-    type?: string; mediaUrl?: string; replyToMessageId?: string;
+    type?: string; mediaUrl?: string; mediaType?: string; replyToMessageId?: string;
   }): Observable<MessageResponse | null> {
     return this.http
       .post<any>(`${this.GATEWAY}/messages/room/${roomId}`,
         { content, type: options?.type ?? 'TEXT', mediaUrl: options?.mediaUrl,
+          mediaType: options?.mediaType,
           replyToMessageId: options?.replyToMessageId },
         { headers: this.authHeaders() })
       .pipe(map(res => res?.data ?? null), catchError(() => of(null)));
