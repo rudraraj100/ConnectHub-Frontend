@@ -252,7 +252,9 @@ export class RegisterComponent implements OnInit, OnDestroy {
       countryCode: this.selectedCountry().dial,
       phoneNumber: phoneNumber?.trim() || undefined
     }).subscribe({
-      next: () => this.router.navigate(['/login']),   // ← back to login after sign-up
+      next: () => this.router.navigate(['/verify-email-sent'], {
+          queryParams: { email: email.trim() }
+        }),   // ✅ user must verify email before logging in
       error: (err: any) => {
         this.registerError.set(err.error?.message || 'Registration failed. Please try again.');
         this.isLoading.set(false);

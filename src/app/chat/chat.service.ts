@@ -20,6 +20,11 @@ export interface UserProfile {
   city?: string;
   countryCode?: string;
   phoneNumber?: string;
+  /** Subscription plan — FREE (default) or PREMIUM. */
+  plan?: string;
+  /** Custom presence text — only set by PREMIUM users. */
+  customStatus?: string;
+  avatarImgError?: boolean; // UI-only: true when avatar img 404s → fallback to letter
 }
 
 export interface RoomResponse {
@@ -36,6 +41,7 @@ export interface RoomResponse {
   createdAt: string;
   unreadCount: number;
   currentUserRole: string; // ADMIN | MEMBER
+  lastMessage?: string;    // latest message preview — set on the client, not from server
 }
 
 export interface RoomMemberResponse {
@@ -54,11 +60,13 @@ export interface MessageResponse {
   messageId: string;
   roomId: string;
   senderId: string;
-  senderName: string;
+  senderName: string;      // enriched: fullName → username → senderId (never null)
+  senderUsername?: string; // raw @handle — fallback when senderName is a UUID
   senderAvatar: string;
   content: string;
   type: string;
   mediaUrl: string;
+  mediaType?: string;      // IMAGE | VIDEO | FILE — drives media bubble rendering
   replyToMessageId: string;
   isEdited: boolean;
   isDeleted: boolean;
@@ -81,10 +89,10 @@ export class ChatService {
 
   private authHeaders(): HttpHeaders {
     const token = isPlatformBrowser(this.platform) ? localStorage.getItem('jwt_token') : null;
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`
-      // X-User-Id is injected by JwtGatewayFilter — never sent from the client
-    });
+    // Guard: never send "Bearer null" — the gateway rejects it with 401.
+    // If the token is missing the request will fail with 401 and the user will be redirected to login.
+    if (!token) return new HttpHeaders();
+    return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 
   // ── Auth Service ───────────────────────────────────────────────
@@ -118,6 +126,7 @@ export class ChatService {
   updateProfile(patch: {
     fullName?: string; username?: string; bio?: string; avatarUrl?: string;
     country?: string; city?: string; countryCode?: string; phoneNumber?: string;
+    customStatus?: string;  // PREMIUM only — backend enforces the plan gate
   }): Observable<any> {
     return this.http
       .put<any>(`${this.GATEWAY}/auth/profile`, patch, { headers: this.authHeaders() })
@@ -313,5 +322,48 @@ export class ChatService {
         { headers: this.authHeaders() })
       .pipe(map(res => res?.data ?? 0), catchError(() => of(0)));
   }
+
+  // ── Pin Message (PREMIUM feature) ────────────────────────────────────────
+  /** Pin a message in a room — caller must be room admin + premium. */
+  pinRoomMessage(roomId: string, messageId: string): Observable<boolean> {
+    return this.http
+      .patch<any>(`${this.GATEWAY}/rooms/${roomId}/messages/${messageId}/pin`, {},
+        { headers: this.authHeaders() })
+      .pipe(map(() => true), catchError(() => of(false)));
+  }
+
+  /** Unpin the currently-pinned message in a room. */
+  unpinRoomMessage(roomId: string): Observable<boolean> {
+    return this.http
+      .delete<any>(`${this.GATEWAY}/rooms/${roomId}/messages/pin`,
+        { headers: this.authHeaders() })
+      .pipe(map(() => true), catchError(() => of(false)));
+  }
+
+  // ── Payment Service ──────────────────────────────────────────────
+  // Why no separate component? Razorpay checkout.js is a hosted JS popup
+  // from Razorpay's CDN. We just call new Razorpay(options).open() —
+  // Razorpay renders its own full UI. No Angular component needed.
+
+  /** Create a Razorpay order — returns { orderId, razorpayOrderId, amount, currency, keyId } */
+  createPaymentOrder(): Observable<any> {
+    return this.http
+      .post<any>(`${this.GATEWAY}/payments/orders`, {},
+        { headers: this.authHeaders() })
+      .pipe(map(res => res?.data ?? null), catchError(() => of(null)));
+  }
+
+  /** Verify payment signature after Razorpay popup succeeds */
+  verifyPayment(payload: {
+    razorpayOrderId: string;
+    razorpayPaymentId: string;
+    razorpaySignature: string;
+  }): Observable<any> {
+    return this.http
+      .post<any>(`${this.GATEWAY}/payments/verify`, payload,
+        { headers: this.authHeaders() })
+      .pipe(map(res => res?.data ?? null), catchError(() => of(null)));
+  }
 }
+
 

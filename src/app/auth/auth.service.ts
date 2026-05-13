@@ -33,6 +33,10 @@ export interface UserProfile {
   phoneNumber?: string;
 }
 
+/**
+ * AuthService handles user authentication, token storage, and profile management.
+ * It communicates with the /auth endpoints on the API Gateway.
+ */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
@@ -42,6 +46,10 @@ export class AuthService {
   private readonly platform = inject(PLATFORM_ID);
 
   // ── Storage helpers ────────────────────────────────────────────
+  /**
+   * Persists the JWT and refresh tokens in the browser's localStorage.
+   * This allows the user to stay logged in even after refreshing the page.
+   */
   saveTokens(token: string, refreshToken: string, user?: UserProfile): void {
     if (isPlatformBrowser(this.platform)) {
       localStorage.setItem('jwt_token', token);
@@ -80,6 +88,7 @@ export class AuthService {
 
   // ── API calls ──────────────────────────────────────────────────
 
+  // Register now returns 202 with just a message — no JWT issued until email is verified
   register(payload: {
     fullName: string;
     username: string;
@@ -89,15 +98,27 @@ export class AuthService {
     city?: string;
     countryCode?: string;
     phoneNumber?: string;
-  }): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.BASE_URL}/register`, payload).pipe(
-      tap(res => {
-        if (res.success)
-          this.saveTokens(res.data.token, res.data.refreshToken, res.data.user);
-      })
-    );
+  }): Observable<any> {
+    return this.http.post<any>(`${this.BASE_URL}/register`, payload);
   }
 
+  // Submits the 6-digit OTP to verify the email address
+  verifyOtp(email: string, otp: string): Observable<any> {
+    return this.http.post<any>(`${this.BASE_URL}/verify-otp`, null, {
+      params: { email, otp }
+    });
+  }
+
+  // Re-sends a verification OTP
+  resendVerification(email: string): Observable<any> {
+    return this.http.post<any>(`${this.BASE_URL}/resend-verification`, null, {
+      params: { email }
+    });
+  }
+
+  /**
+   * Performs the login request and saves the returned tokens on success.
+   */
   login(payload: { email: string; password: string }): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.BASE_URL}/login`, payload).pipe(
       tap(res => {

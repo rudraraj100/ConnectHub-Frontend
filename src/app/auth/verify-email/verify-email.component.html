@@ -1,0 +1,43 @@
+<div class="verify-wrapper">
+  <div class="verify-card">
+
+    @if (status() === 'loading') {
+      <div class="status-icon loading-icon">
+        <span class="spinner-lg"></span>
+      </div>
+      <h1 class="title">Verifying your email…</h1>
+      <p class="subtitle">Please wait while we confirm your email address.</p>
+    }
+
+    @if (status() === 'success') {
+      <div class="status-icon success-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="9 12 11 14 15 10"/>
+        </svg>
+      </div>
+      <h1 class="title">Email verified! 🎉</h1>
+      <p class="subtitle">{{ message() }}</p>
+      <p class="redirect-note">Redirecting to login in 3 seconds…</p>
+      <button class="btn-goto-login" id="verified-goto-login" (click)="goToLogin()">
+        Go to Sign In
+      </button>
+    }
+
+    @if (status() === 'error') {
+      <div class="status-icon error-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
+        </svg>
+      </div>
+      <h1 class="title">Verification failed</h1>
+      <p class="subtitle">{{ message() }}</p>
+      <button class="btn-goto-login" id="error-goto-login" (click)="goToLogin()">
+        ← Back to Sign In
+      </button>
+    }
+
+  </div>
+</div>

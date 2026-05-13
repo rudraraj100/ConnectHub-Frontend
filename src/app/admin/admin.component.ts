@@ -1,118 +1,302 @@
-import { Component, OnInit, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ChatService } from '../chat/chat.service';
+import { AdminService, AdminUser, AdminRoom, UserReport } from './admin.service';
 
-interface UserRow  { id:number; name:string; email:string; role:string; status:'active'|'suspended'; joined:string; }
-interface RoomRow  { id:number; name:string; members:number; messages:number; created:string; }
-interface AuditLog { id:number; action:string; target:string; by:string; time:string; }
+interface AuditLog {
+  id: number;
+  action: string;
+  target: string;
+  by: string;
+  time: string;
+}
 
 @Component({
   selector: 'app-admin',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './admin.component.html',
-  styleUrls: ['./admin.component.css']
+  styleUrls: ['./admin.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush   // prevents NG0100 on totalUsers getter
 })
 export class AdminComponent implements OnInit {
+
   private router   = inject(Router);
   private platform = inject(PLATFORM_ID);
-  private chatSvc  = inject(ChatService);
+  private adminSvc = inject(AdminService);
+  private cdr      = inject(ChangeDetectorRef);
 
-  activeSection: 'overview'|'users'|'rooms'|'broadcast'|'logs' = 'overview';
-  broadcastMsg = '';
-  broadcastSent = false;
-  isLoadingUsers = false;
+  // No hardcoded email — adminship is determined by user.role === 'PLATFORM_ADMIN' from the DB
 
-  users: UserRow[] = [
-    {id:1,name:'Ananya Sharma',  email:'ananya.sharma@gmail.com', role:'Member',  status:'active',   joined:'2026-01-12'},
-    {id:2,name:'Rahul Verma',    email:'rahul.verma@gmail.com',   role:'Member',  status:'active',   joined:'2026-01-18'},
-    {id:3,name:'Priya Nair',     email:'priya.nair@gmail.com',    role:'Member',  status:'suspended',joined:'2026-02-05'},
-    {id:4,name:'Arjun Kapoor',   email:'arjun.kapoor@gmail.com',  role:'Member',  status:'active',   joined:'2026-02-14'},
-    {id:5,name:'Sneha Joshi',    email:'sneha.joshi@gmail.com',   role:'Member',  status:'active',   joined:'2026-03-02'},
-    {id:6,name:'Vikram Mehta',   email:'vikram.mehta@gmail.com',  role:'Member',  status:'suspended',joined:'2026-03-19'},
-    {id:7,name:'Rudra Raj',      email:'rudrar2002@gmail.com',    role:'Admin',   status:'active',   joined:'2025-12-01'},
-  ];
+  activeSection: 'overview' | 'users' | 'rooms' | 'broadcast' | 'reports' | 'logs' = 'overview';
 
-  rooms: RoomRow[] = [
-    {id:1,name:'UI/UX Designing',  members:12,messages:847, created:'2026-01-15'},
-    {id:2,name:'Web Development',  members:18,messages:2341,created:'2026-01-20'},
-    {id:3,name:'Product Strategy', members:7, messages:412, created:'2026-02-08'},
-    {id:4,name:'Design Reviews',   members:5, messages:189, created:'2026-02-22'},
-    {id:5,name:'DevOps Channel',   members:9, messages:673, created:'2026-03-10'},
-  ];
+  // ── Data ──────────────────────────────────────────────────────────────────
+  users:   AdminUser[]  = [];
+  rooms:   AdminRoom[]  = [];
+  reports: UserReport[] = [];
+  logs:    AuditLog[]   = [];
 
-  logs: AuditLog[] = [
-    {id:1,action:'Suspended user',  target:'Priya Nair',     by:'Rudra Raj',time:'2026-04-22 11:30'},
-    {id:2,action:'Deleted message', target:'Web Dev Room',   by:'Rudra Raj',time:'2026-04-22 10:15'},
-    {id:3,action:'Suspended user',  target:'Vikram Mehta',   by:'Rudra Raj',time:'2026-04-21 16:45'},
-    {id:4,action:'Broadcast sent',  target:'All users',      by:'Rudra Raj',time:'2026-04-20 09:00'},
-    {id:5,action:'Deleted room',    target:'Test Room',      by:'Rudra Raj',time:'2026-04-19 14:22'},
-  ];
+  // ── Loading / error flags ─────────────────────────────────────────────────
+  isLoadingUsers   = true;
+  isLoadingRooms   = true;
+  isLoadingReports = false;
+  errorUsers       = '';
+  errorRooms       = '';
+  errorReports     = '';
 
-  get totalUsers()    { return this.users.length; }
-  get activeUsers()   { return this.users.filter(u=>u.status==='active').length; }
-  get suspendedUsers(){ return this.users.filter(u=>u.status==='suspended').length; }
-  get totalRooms()    { return this.rooms.length; }
-  get totalMessages() { return this.rooms.reduce((a,r)=>a+r.messages,0); }
+  // ── Broadcast ────────────────────────────────────────────────────────────
+  broadcastTitle   = '';
+  broadcastMsg     = '';
+  broadcastSent    = false;
+  broadcastError   = '';
+  isSendingBroadcast = false;
 
+  // ── Computed stats ────────────────────────────────────────────────────────
+  get totalUsers()      { return this.users.length; }
+  get activeUsers()     { return this.users.filter(u => u.isActive).length; }
+  get suspendedUsers()  { return this.users.filter(u => !u.isActive).length; }
+  get totalRooms()      { return this.rooms.length; }
+  get groupRooms()      { return this.rooms.filter(r => r.type === 'GROUP').length; }
+  get pendingReports()  { return this.reports.filter(r => r.status === 'PENDING').length; }
+
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
   ngOnInit() {
     if (!isPlatformBrowser(this.platform)) return;
+
+    // Auth guard — must be logged in as admin
     const token = localStorage.getItem('jwt_token');
     if (!token) { this.router.navigate(['/login']); return; }
+
     const raw = localStorage.getItem('current_user');
     if (raw) {
       try {
         const u = JSON.parse(raw);
-        const email = u?.email || '';
-        if (email !== 'rudrar2002@gmail.com') { this.router.navigate(['/chat']); return; }
-      } catch { this.router.navigate(['/chat']); }
-    } else { this.router.navigate(['/chat']); }
+        if ((u?.role || '') !== 'PLATFORM_ADMIN') { this.router.navigate(['/chat']); return; }
+      } catch { this.router.navigate(['/chat']); return; }
+    } else { this.router.navigate(['/chat']); return; }
 
-    // Try to load real users from auth service
+    this.loadUsers();
+    this.loadRooms();
+    this.loadReports();
+  }
+
+  // ── Data loaders ─────────────────────────────────────────────────────────
+
+  loadUsers() {
     this.isLoadingUsers = true;
-    this.chatSvc.searchUsers('').subscribe({
-      next: (users) => {
-        if (users && users.length > 0) {
-          this.users = users.map(u => ({
-            id: u.userId as any,
-            name: u.fullName || u.username,
-            email: u.email,
-            role: u.email === 'rudrar2002@gmail.com' ? 'Admin' : 'Member',
-            status: (u.isActive ? 'active' : 'suspended') as any,
-            joined: u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-CA') : '—'
-          }));
-        }
+    this.errorUsers     = '';
+    this.adminSvc.getUsers().subscribe({
+      next: users => {
+        this.users          = users;
         this.isLoadingUsers = false;
+        this.cdr.markForCheck();
       },
-      error: () => { this.isLoadingUsers = false; /* keep mock data */ }
+      error: () => {
+        this.errorUsers     = 'Failed to load users. Is auth-service running?';
+        this.isLoadingUsers = false;
+        this.cdr.markForCheck();
+      }
     });
   }
 
-  toggleUserStatus(u: UserRow) {
-    u.status = u.status === 'active' ? 'suspended' : 'active';
-    this.logs.unshift({
-      id: Date.now(), action: u.status==='suspended' ? 'Suspended user' : 'Reactivated user',
-      target: u.name, by:'Rudra Raj', time: new Date().toLocaleString()
+  loadRooms() {
+    this.isLoadingRooms = true;
+    this.errorRooms     = '';
+    this.adminSvc.getRooms().subscribe({
+      next: rooms => {
+        this.rooms          = rooms;
+        this.isLoadingRooms = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.errorRooms     = 'Failed to load rooms. Is room-service running?';
+        this.isLoadingRooms = false;
+        this.cdr.markForCheck();
+      }
     });
   }
-  deleteUser(u: UserRow) {
-    if(!confirm(`Permanently delete ${u.name}?`)) return;
-    this.users = this.users.filter(x=>x.id!==u.id);
-    this.logs.unshift({id:Date.now(),action:'Deleted user',target:u.name,by:'Rudra Raj',time:new Date().toLocaleString()});
+
+  // ── User actions ──────────────────────────────────────────────────────────
+
+  toggleUserStatus(u: AdminUser) {
+    const prevState = u.isActive;
+    this.adminSvc.toggleUser(u.userId).subscribe({
+      next: updated => {
+        if (updated) {
+          // Update in-place so the table re-renders immediately
+          const idx = this.users.findIndex(x => x.userId === u.userId);
+          if (idx >= 0) this.users[idx] = updated;
+          this.addLog(
+            updated.isActive ? 'Reactivated user' : 'Suspended user',
+            updated.fullName || updated.username
+          );
+        }
+      },
+      error: () => {
+        // Revert optimistic update
+        u.isActive = prevState;
+      }
+    });
   }
-  deleteRoom(r: RoomRow) {
-    if(!confirm(`Delete room "${r.name}"?`)) return;
-    this.rooms = this.rooms.filter(x=>x.id!==r.id);
-    this.logs.unshift({id:Date.now(),action:'Deleted room',target:r.name,by:'Rudra Raj',time:new Date().toLocaleString()});
+
+  deleteUser(u: AdminUser) {
+    if (!confirm(`Permanently delete "${u.fullName || u.username}"? This cannot be undone.`)) return;
+    this.adminSvc.deleteUser(u.userId).subscribe({
+      next: ok => {
+        if (ok) {
+          this.users = this.users.filter(x => x.userId !== u.userId);
+          // Also remove from reports list if present
+          this.reports = this.reports.filter(r => r.reportedUserId !== u.userId);
+          this.addLog('Deleted user', u.fullName || u.username);
+        }
+      }
+    });
   }
+
+  // ── Room actions ──────────────────────────────────────────────────────────
+
+  deleteRoom(r: AdminRoom) {
+    if (!confirm(`Delete room "${r.name}"? All messages will be lost.`)) return;
+    this.adminSvc.deleteRoom(r.roomId).subscribe({
+      next: ok => {
+        if (ok) {
+          this.rooms = this.rooms.filter(x => x.roomId !== r.roomId);
+          this.addLog('Deleted room', r.name);
+        }
+      }
+    });
+  }
+
+  // ── Broadcast ─────────────────────────────────────────────────────────────
+
   sendBroadcast() {
-    if(!this.broadcastMsg.trim()) return;
-    this.logs.unshift({id:Date.now(),action:'Broadcast sent',target:'All users',by:'Rudra Raj',time:new Date().toLocaleString()});
-    this.broadcastSent = true;
-    this.broadcastMsg = '';
-    setTimeout(()=>this.broadcastSent=false, 3000);
+    if (!this.broadcastMsg.trim() || !this.broadcastTitle.trim()) return;
+    this.isSendingBroadcast = true;
+    this.broadcastError     = '';
+
+    const recipientIds = this.users.map(u => u.userId);
+    this.adminSvc.broadcast(recipientIds, this.broadcastTitle, this.broadcastMsg).subscribe({
+      next: ok => {
+        this.isSendingBroadcast = false;
+        if (ok) {
+          this.addLog('Broadcast sent', `${recipientIds.length} users`);
+          this.broadcastSent  = true;
+          this.broadcastTitle = '';
+          this.broadcastMsg   = '';
+          setTimeout(() => this.broadcastSent = false, 4000);
+        } else {
+          this.broadcastError = 'Broadcast failed. Check notification-service.';
+        }
+      },
+      error: () => {
+        this.isSendingBroadcast = false;
+        this.broadcastError = 'Broadcast failed. Check notification-service.';
+      }
+    });
   }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  loadReports() {
+    this.isLoadingReports = true;
+    this.errorReports     = '';
+    this.adminSvc.getReports().subscribe({
+      next: reports => {
+        this.reports          = reports;
+        this.isLoadingReports = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.errorReports     = 'Failed to load reports.';
+        this.isLoadingReports = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  resolveReport(report: UserReport) {
+    this.adminSvc.updateReportStatus(report.reportId, 'RESOLVED').subscribe({
+      next: updated => {
+        if (updated) {
+          const idx = this.reports.findIndex(r => r.reportId === report.reportId);
+          if (idx >= 0) this.reports[idx] = updated;
+          this.addLog('Resolved report', `${report.reportedUsername} (${report.reason})`);
+          this.cdr.markForCheck();
+        }
+      }
+    });
+  }
+
+  dismissReport(report: UserReport) {
+    this.adminSvc.updateReportStatus(report.reportId, 'DISMISSED').subscribe({
+      next: updated => {
+        if (updated) {
+          const idx = this.reports.findIndex(r => r.reportId === report.reportId);
+          if (idx >= 0) this.reports[idx] = updated;
+          this.addLog('Dismissed report', `${report.reportedUsername} (${report.reason})`);
+          this.cdr.markForCheck();
+        }
+      }
+    });
+  }
+
+  suspendFromReport(report: UserReport) {
+    const user = this.users.find(u => u.userId === report.reportedUserId);
+    if (!user) {
+      alert(`User "${report.reportedUsername}" not found in user list. Refresh users first.`);
+      return;
+    }
+    if (!user.isActive) {
+      alert(`"${report.reportedUsername}" is already suspended.`);
+      return;
+    }
+    this.adminSvc.toggleUser(user.userId).subscribe({
+      next: updated => {
+        if (updated) {
+          const idx = this.users.findIndex(u => u.userId === user.userId);
+          if (idx >= 0) this.users[idx] = updated;
+          this.addLog('Suspended user (from report)', report.reportedUsername);
+          // Auto-resolve the report
+          this.resolveReport(report);
+          this.cdr.markForCheck();
+        }
+      }
+    });
+  }
+
+  deleteFromReport(report: UserReport) {
+    if (!confirm(`Permanently delete user "${report.reportedUsername}"? This cannot be undone.`)) return;
+    this.adminSvc.deleteUser(report.reportedUserId).subscribe({
+      next: ok => {
+        if (ok) {
+          this.users    = this.users.filter(u => u.userId !== report.reportedUserId);
+          this.reports  = this.reports.filter(r => r.reportedUserId !== report.reportedUserId);
+          this.addLog('Deleted user (from report)', report.reportedUsername);
+          this.cdr.markForCheck();
+        }
+      }
+    });
+  }
+
+  private addLog(action: string, target: string) {
+    this.logs.unshift({
+      id:     Date.now(),
+      action,
+      target,
+      by:     'Admin',
+      time:   new Date().toLocaleString('en-IN', { hour12: true }),
+    });
+  }
+
+  formatDate(iso: string | null): string {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleDateString('en-CA');   // YYYY-MM-DD
+  }
+
+  avatarLetter(u: AdminUser): string {
+    return (u.fullName || u.username || '?').charAt(0).toUpperCase();
+  }
+
   goBack() { this.router.navigate(['/chat']); }
 }

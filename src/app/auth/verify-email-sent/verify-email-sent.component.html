@@ -1,0 +1,165 @@
+<div class="page-wrapper">
+
+  <!-- ── Left decorative panel ── -->
+  <div class="left-panel" aria-hidden="true">
+    <div class="glow-ring"></div>
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="15" stroke="white" stroke-width="1.5"/>
+          <path d="M8 12h16M8 16h10M8 20h13" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="brand-name">ConnectHub</span>
+    </div>
+    <div class="left-text">
+      <h2>One step away from<br>joining the conversation</h2>
+      <p>Enter the 6-digit code we emailed you.<br>It's valid for 15 minutes.</p>
+    </div>
+    <div class="shield-icon">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="rgba(192,132,252,0.4)" stroke-width="1">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ── Right panel — OTP form ── -->
+  <div class="right-panel">
+    <div class="otp-card" id="otp-card">
+
+      @if (verifySuccess()) {
+        <!-- Success state -->
+        <div class="success-state">
+          <div class="success-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <h2 class="success-title">Email Verified!</h2>
+          <p class="success-sub">Your account is now active.<br>Redirecting you to login…</p>
+          <div class="redirect-bar"><div class="redirect-fill"></div></div>
+        </div>
+
+      } @else {
+        <!-- OTP input state -->
+        <div class="card-header">
+          <div class="email-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.5">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <h1 class="card-title">Verify your email</h1>
+          <p class="card-subtitle">
+            We sent a 6-digit code to<br>
+            <span class="email-display">{{ email() || 'your email' }}</span>
+          </p>
+
+          <!-- Banner shown when OTP was auto-sent from the login page -->
+          @if (otpJustSent()) {
+            <div class="sent-banner" id="otp-sent-banner">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              A new code was just sent to your inbox!
+            </div>
+          }
+        </div>
+
+        <!-- 6-digit OTP boxes -->
+        <div class="otp-row" id="otp-row" (paste)="onPaste($event)">
+          @for (d of digits(); track $index) {
+            <input
+              [id]="'otp-' + $index"
+              class="otp-box"
+              [class.filled]="d !== ''"
+              type="text"
+              inputmode="numeric"
+              maxlength="1"
+              [value]="d"
+              autocomplete="one-time-code"
+              (input)="onDigitInput($event, $index)"
+              (keydown)="onDigitKeydown($event, $index)"
+            />
+          }
+        </div>
+
+        <!-- Verify error -->
+        @if (verifyError()) {
+          <div class="error-banner" role="alert" id="otp-error">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            {{ verifyError() }}
+          </div>
+        }
+
+        <!-- Verify button -->
+        <button
+          id="verify-otp-btn"
+          class="btn-verify"
+          [disabled]="!otpComplete || verifyLoading()"
+          (click)="verify()"
+        >
+          @if (verifyLoading()) {
+            <span class="spinner"></span> Verifying…
+          } @else {
+            Verify Email
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+          }
+        </button>
+
+        <!-- Resend section -->
+        <div class="resend-section">
+          <p class="resend-label">Didn't receive the code?</p>
+
+          @if (resendSuccess()) {
+            <span class="resend-ok" id="resend-ok">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+              </svg>
+              New code sent!
+              @if (resendCooldown() > 0) {
+                <span class="cooldown">(resend in {{ resendCooldown() }}s)</span>
+              }
+            </span>
+          } @else {
+            <button
+              id="resend-otp-btn"
+              class="btn-resend"
+              [disabled]="resendLoading() || resendCooldown() > 0"
+              (click)="resend()"
+            >
+              @if (resendLoading()) {
+                Sending…
+              } @else if (resendCooldown() > 0) {
+                Resend in {{ resendCooldown() }}s
+              } @else {
+                Resend code
+              }
+            </button>
+          }
+
+          @if (resendError()) {
+            <span class="resend-err">{{ resendError() }}</span>
+          }
+        </div>
+
+        <div class="back-link">
+          <button class="btn-back" (click)="goToLogin()" id="back-to-login">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Back to Login
+          </button>
+        </div>
+      }
+
+    </div>
+  </div>
+
+</div>

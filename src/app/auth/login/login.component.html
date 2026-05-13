@@ -141,8 +141,50 @@
           </button>
         </div>
 
+        <!-- Suspended Banner -->
+        @if (suspendedBanner()) {
+          <div class="suspended-banner" role="alert">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+            </svg>
+            <div>
+              <strong>Account Suspended</strong>
+              <p>Your account has been suspended by an administrator. Please contact support.</p>
+            </div>
+          </div>
+        }
+
+        <!-- Email Not Verified Banner — redirects to OTP page -->
+        @if (emailNotVerified()) {
+          <div class="verify-banner" role="alert" id="email-not-verified-banner">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            <div class="verify-banner-body">
+              <strong>Email not verified</strong>
+              <p>Please enter the 6-digit OTP we sent to your inbox to activate your account.</p>
+              <div class="verify-actions">
+                <button type="button" class="resend-btn" id="enter-otp-btn"
+                        (click)="goToOtpPage()" [disabled]="resendLoading()">
+                  {{ resendLoading() ? 'Sending OTP…' : 'Enter OTP' }}
+                </button>
+                @if (resendSuccess()) {
+                  <span class="resend-ok">✅ New OTP sent!</span>
+                } @else {
+                  <button type="button" class="resend-link" id="resend-verification-btn"
+                          (click)="resendVerification()" [disabled]="resendLoading()">
+                    {{ resendLoading() ? 'Sending…' : 'Resend OTP' }}
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+
         <!-- Login Error -->
-        @if (loginError()) {
+        @if (loginError() && !suspendedBanner()) {
           <div class="error-banner" role="alert">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>

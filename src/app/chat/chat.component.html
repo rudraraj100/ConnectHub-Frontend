@@ -1,928 +1,1493 @@
 <div class="app-shell">
 
-  <!-- ─── Vertical Sidebar ─────────────────────────────────────── -->
-  <nav class="sidebar">
-    <div class="sidebar-brand"><span class="brand-text">CH</span></div>
-    <div class="nav-links">
-      <button class="nav-btn" [class.active]="activeTab==='home'"   (click)="activeTab='home'"   title="Home">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      </button>
-      <button class="nav-btn" [class.active]="activeTab==='people'" (click)="activeTab='people'" title="People">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      </button>
-      <button class="nav-btn" [class.active]="activeTab==='chat'"   (click)="activeTab='chat'"   title="Chat">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        @if (totalUnread > 0) {
-          <span class="badge">{{ totalUnread > 9 ? '9+' : totalUnread }}</span>
-        }
-      </button>
-      <button class="nav-btn notif-nav-btn" [class.active]="showNotifications"
-              (click)="openNotifications()" title="Notifications" id="notif-nav-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-        </svg>
-        @if (unreadNotifCount > 0) {
-          <span class="badge notif-badge">{{ unreadNotifCount > 9 ? '9+' : unreadNotifCount }}</span>
-        }
-      </button>
-    </div>
-    <div class="nav-bottom">
-      <button class="nav-btn" [class.active]="showSettings" (click)="openSettings()" title="Settings" id="settings-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      </button>
-      @if (isAdmin) {
-        <button class="nav-btn admin-btn" (click)="goAdmin()" title="Admin Panel">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </button>
-      }
-    </div>
-  </nav>
+    <!-- ─── Vertical Sidebar ─────────────────────────────────────── -->
+    <nav class="sidebar">
+        <div class="sidebar-brand"><span class="brand-text">CH</span></div>
+        <div class="nav-links">
+            <button class="nav-btn" [class.active]="activeTab==='home'" (click)="activeTab='home'" title="Home">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+                <span class="nav-label">Home</span>
+            </button>
+            <button class="nav-btn" [class.active]="activeTab==='people'" (click)="activeTab='people'" title="People">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                <span class="nav-label">People</span>
+            </button>
+            <button class="nav-btn" [class.active]="activeTab==='chat'" (click)="activeTab='chat'" title="Chat">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                @if (totalUnread > 0) {
+                <span class="badge">{{ totalUnread > 9 ? '9+' : totalUnread }}</span>
+                }
+                <span class="nav-label">Chat</span>
+            </button>
+            <!-- Toast anchor: position:relative so the popup offsets from here -->
+            <div class="notif-toast-anchor">
+                <button class="nav-btn notif-nav-btn" [class.active]="showNotifications" (click)="openNotifications()"
+                    title="Notifications" id="notif-nav-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                    @if (unreadNotifCount > 0) {
+                    <span class="badge notif-badge">{{ unreadNotifCount > 9 ? '9+' : unreadNotifCount }}</span>
+                    }
+                    <span class="nav-label">Notifs</span>
+                </button>
 
-  <!-- ─── Notification Panel ──────────────────────────────────── -->
-  @if (showNotifications) {
+                <!-- 3-second notification toast -->
+                @if (toastNotif) {
+                <div class="notif-toast" id="notif-toast-popup" role="alert" aria-live="polite">
+                    <div class="notif-toast-icon">
+                        @switch (toastNotif.type) {
+                        @case ('NEW_MESSAGE') { 💬 }
+                        @case ('MENTION') { 🔖 }
+                        @case ('ROOM_INVITE') { 🏠 }
+                        @case ('SYSTEM') { 📢 }
+                        @default { 🔔 }
+                        }
+                    </div>
+                    <div class="notif-toast-body">
+                        <div class="notif-toast-title">{{ toastNotif.title }}</div>
+                        @if (toastNotif.message) {
+                        <div class="notif-toast-msg">{{ toastNotif.message | slice:0:80 }}{{ toastNotif.message.length >
+                            80 ? '…' : '' }}</div>
+                        }
+                    </div>
+                    <button class="notif-toast-close" (click)="toastNotif = null" title="Dismiss">✕</button>
+                </div>
+                }
+            </div>
+        </div>
+        <div class="nav-bottom">
+            <button class="nav-btn" [class.active]="showSettings" (click)="openSettings()" title="Settings"
+                id="settings-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3" />
+                    <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+                <span class="nav-label">Settings</span>
+            </button>
+            @if (isAdmin) {
+            <button class="nav-btn admin-btn" (click)="goAdmin()" title="Admin Panel">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                <span class="nav-label">Admin</span>
+            </button>
+            }
+
+            <!-- ── Plan Badge (bottom of sidebar) ─────────────────── -->
+            <div class="sidebar-plan-pill" [class.plan-premium]="isPremium" [class.plan-free]="!isPremium"
+                (click)="isPremium ? openPremiumModal() : openUpgradeModal()"
+                [title]="isPremium ? 'ConnectHub Premium ✨' : 'Free plan — click to upgrade'"
+                id="sidebar-plan-badge">
+                <span class="plan-label">{{ isPremium ? 'Premium' : 'FREE' }}</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ─── Notification Panel ──────────────────────────────────── -->
+    @if (showNotifications) {
     <div class="notif-panel" id="notif-panel">
-      <div class="notif-panel-header">
-        <span class="notif-panel-title">Notifications</span>
-        <div class="notif-header-actions">
-          @if (unreadNotifCount > 0) {
-            <button class="notif-mark-all-btn" (click)="onMarkAllRead()" title="Mark all as read">
-              Mark all read
-            </button>
-          }
-          <button class="notif-close-btn" (click)="closeNotifications()" title="Close">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
+        <div class="notif-panel-header">
+            <span class="notif-panel-title">Notifications</span>
+            <div class="notif-header-actions">
+                @if (unreadNotifCount > 0) {
+                <button class="notif-mark-all-btn" (click)="onMarkAllRead()" title="Mark all as read">
+                    Mark all read
+                </button>
+                }
+                <button class="notif-close-btn" (click)="closeNotifications()" title="Close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            </div>
         </div>
-      </div>
 
-      <div class="notif-list">
-        @if (notifications.length === 0) {
-          <div class="notif-empty">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="notif-empty-icon">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-            </svg>
-            <p>No notifications yet</p>
-          </div>
-        }
-        @for (n of notifications; track n.notificationId) {
-          <div class="notif-item" [class.unread]="!n.isRead" (click)="onMarkAsRead(n.notificationId)">
-            <div class="notif-type-icon" [class]="'notif-type-' + n.type.toLowerCase()">
-              @switch (n.type) {
-                @case ('NEW_MESSAGE')  { 💬 }
-                @case ('MENTION')      { @️ }
-                @case ('ROOM_INVITE')  { 🏠 }
-                @default               { 🔔 }
-              }
+        <div class="notif-list">
+            @if (notifications.length === 0) {
+            <div class="notif-empty">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="notif-empty-icon">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+                <p>No notifications yet</p>
             </div>
-            <div class="notif-content">
-              <div class="notif-title">{{ n.title }}</div>
-              @if (n.message) {
-                <div class="notif-msg">{{ n.message }}</div>
-              }
-              <div class="notif-time">{{ n.createdAt | date:'MMM d, h:mm a' }}</div>
+            }
+            @for (n of notifications; track n.notificationId) {
+            <div class="notif-item" [class.unread]="!n.isRead" (click)="openNotifDetail(n)"
+                title="Click to view full notification">
+                <div class="notif-type-icon" [class]="'notif-type-' + n.type.toLowerCase()">
+                    @switch (n.type) {
+                    @case ('NEW_MESSAGE') { 💬 }
+                    @case ('MENTION') { @️ }
+                    @case ('ROOM_INVITE') { 🏠 }
+                    @default { 🔔 }
+                    }
+                </div>
+                <div class="notif-content">
+                    <div class="notif-title">{{ n.title }}</div>
+                    @if (n.message) {
+                    <div class="notif-msg">{{ n.message }}</div>
+                    }
+                    <div class="notif-time">{{ n.createdAt | date:'MMM d, h:mm a' }}</div>
+                </div>
+                <button class="notif-del-btn" (click)="$event.stopPropagation(); onDeleteNotif(n.notificationId)"
+                    title="Delete">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6" />
+                        <path d="M19 6l-1 14H6L5 6" />
+                        <path d="M10 11v6" />
+                        <path d="M14 11v6" />
+                    </svg>
+                </button>
             </div>
-            <button class="notif-del-btn" (click)="$event.stopPropagation(); onDeleteNotif(n.notificationId)" title="Delete">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>
-              </svg>
-            </button>
-          </div>
-        }
-      </div>
+            }
+        </div>
     </div>
-  }
+    }
 
-  <!-- ─── Main Area ─────────────────────────────────────────────── -->
-  <div class="main-area">
+    <!-- ─── Main Area ─────────────────────────────────────────────── -->
+    <div class="main-area">
 
-    <header class="top-header">
-      <h1 class="brand-full">Connect<span>Hub</span></h1>
-      <div class="search-wrap">
-        <svg class="search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" placeholder="Search users, rooms and more…" class="global-search" id="global-search-input"/>
-      </div>
-      <div class="header-actions">
-        <div class="header-avatar" (click)="openProfile()" title="My Profile" id="profile-avatar-btn" style="cursor:pointer">
-          @if (avatarUrl) { <img [src]="avatarUrl" alt="avatar" class="avatar-img"/> }
-          @else { {{ avatarLetter }} }
-        </div>
-      </div>
-    </header>
-
-    <div class="content-area">
-
-      <!-- ══ HOME TAB ══════════════════════════════════════════════ -->
-      @if (activeTab === 'home') {
-        <div class="tab-panel">
-          <div class="home-panel">
-            <div class="home-welcome">
-              <div class="welcome-avatar">
-                @if (avatarUrl) { <img [src]="avatarUrl" class="avatar-img-lg"/> }
-                @else { {{ avatarLetter }} }
-              </div>
-              <div>
-                <h2>Good day, {{ fullName || username || 'there' }}! 👋</h2>
-                <p>Welcome back to ConnectHub.</p>
-                @if (isProfileLoading) { <span class="loading-chip">Syncing profile…</span> }
-              </div>
-            </div>
-            <div class="stat-cards">
-              <div class="stat-card">
-                <span class="stat-icon">👥</span>
-                <div><span class="stat-num">{{ contacts.length }}</span><span class="stat-label">Contacts</span></div>
-              </div>
-              <div class="stat-card">
-                <span class="stat-icon">🏠</span>
-                <div><span class="stat-num">{{ rooms.length }}</span><span class="stat-label">Rooms</span></div>
-              </div>
-              <div class="stat-card">
-                <span class="stat-icon">💬</span>
-                <div><span class="stat-num">{{ totalUnread }}</span><span class="stat-label">Unread</span></div>
-              </div>
-            </div>
-            <div class="quick-actions">
-              <button class="qa-btn" (click)="activeTab='people'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                Find People
-              </button>
-              <button class="qa-btn" (click)="activeTab='chat'; chatMode='room'">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                My Rooms
-              </button>
-            </div>
-          </div>
-        </div>
-      }
-
-      <!-- ══ PEOPLE TAB ════════════════════════════════════════════ -->
-      @if (activeTab === 'people') {
-        <div class="tab-panel">
-          <div class="people-panel">
-            <div class="people-header">
-              <h2>People</h2>
-              <div class="people-search-wrap">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="text" [value]="peopleSearch"
-                       (input)="onPeopleSearch($any($event.target).value)"
-                       placeholder="Search users by username…"
-                       id="people-search-input"/>
-              </div>
-            </div>
-
-            @if (isPeopleLoading) {
-              <div class="loading-row"><div class="spinner"></div><span>Searching users…</span></div>
-            }
-            @if (!isPeopleLoading && peopleSearched && searchResults.length === 0) {
-              <div class="empty-tab" style="height:200px">
-                <div class="empty-icon">🔍</div><h3>No users found</h3><p>Try a different username</p>
-              </div>
-            }
-            @if (!peopleSearched && !peopleSearch) {
-              <p class="search-hint">Type a username to find people on ConnectHub</p>
-            }
-            <div class="people-grid">
-              @for (u of displayedPeople; track u.userId) {
-                <div class="person-card">
-                  <div class="person-avatar" [class]="getStatusClass(u.status)">
-                    @if (u.avatarUrl) { <img [src]="u.avatarUrl" class="avatar-img"/> }
-                    @else { {{ getAvatarLetter(u) }} }
-                  </div>
-                  <div class="person-info">
-                    <span class="person-name">{{ u.fullName || u.username }}</span>
-                    <span class="person-role">&#64;{{ u.username }}</span>
-                    <span class="person-status" [class]="'dot-' + (u.status || 'offline').toLowerCase()">
-                      {{ (u.status || 'offline').toLowerCase() }}
-                    </span>
-                  </div>
-                  <button class="msg-btn" (click)="messagePerson(u)">Message</button>
-                </div>
-              }
-            </div>
-          </div>
-        </div>
-      }
-
-      <!-- ══ CHAT TAB ══════════════════════════════════════════════ -->
-      @if (activeTab === 'chat') {
-        <div class="tab-panel chat-layout">
-
-          <!-- Left: Contact/Room List -->
-          <div class="chat-list-panel">
-            <div class="list-header">
-              <h2>Chat</h2>
-              <div class="mode-toggle">
-                <button [class.active]="chatMode==='individual'" (click)="chatMode='individual'" id="toggle-individual">Individual</button>
-                <button [class.active]="chatMode==='room'"       (click)="chatMode='room'"       id="toggle-room">Room Chat</button>
-              </div>
-            </div>
-            <div class="list-search">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" [(ngModel)]="searchQuery" placeholder="Search…" id="chat-search-input"/>
-            </div>
-
-            <!-- INDIVIDUAL MODE -->
-            @if (chatMode === 'individual') {
-              <div class="contact-list">
-                @if (contacts.length === 0) {
-                  <div class="list-empty">
-                    <div class="empty-icon-sm">👥</div>
-                    <p>No conversations yet.<br/>Go to <b>People</b> to find someone to chat with.</p>
-                  </div>
-                }
-                @for (c of filteredContacts; track c.id) {
-                  <div class="contact-item" [class.selected]="selectedContact?.id===c.id" (click)="selectContact(c)">
-                    <div class="ci-avatar-wrap">
-                      <div class="ci-avatar">{{ c.avatar }}</div>
-                      <!-- Live presence dot — updates from PresenceService.presence$ -->
-                      <span class="presence-dot"
-                            [class.dot-online]="(presenceMap.get(c.userId ?? '')?.status ?? 'OFFLINE') === 'ONLINE'"
-                            [class.dot-away]="(presenceMap.get(c.userId ?? '')?.status ?? 'OFFLINE') === 'AWAY'"
-                            [class.dot-offline]="!(presenceMap.get(c.userId ?? '')?.status) || (presenceMap.get(c.userId ?? '')?.status) === 'OFFLINE'"
-                            [title]="presenceMap.get(c.userId ?? '')?.status ?? 'OFFLINE'">
-                      </span>
+        <header class="top-header">
+            <h1 class="brand-full">Connect<span>Hub</span></h1>
+            <div class="header-actions">
+                <div class="header-avatar-wrap">
+                    <div class="header-avatar" (click)="openProfile()" title="My Profile" id="profile-avatar-btn"
+                        style="cursor:pointer">
+                        @if (avatarUrl && !myAvatarFailed) { <img [src]="avatarUrl" alt="avatar" class="avatar-img"
+                            (error)="myAvatarFailed=true" /> }
+                        @else { {{ avatarLetter }} }
                     </div>
-                    <div class="ci-info">
-                      <div class="ci-top"><span class="ci-name">{{ c.name }}</span><span class="ci-time">{{ c.time }}</span></div>
-                      <div class="ci-bottom">
-                        <span class="ci-msg">{{ c.lastMsg || 'Start a conversation' }}</span>
-                        @if (c.unread > 0) { <span class="ci-badge">{{ c.unread }}</span> }
-                      </div>
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-
-            <!-- ROOM MODE -->
-            @if (chatMode === 'room') {
-              <div class="room-list-header">
-                <span class="room-list-title">My Rooms</span>
-                <button class="create-room-btn" (click)="openCreateRoom()" id="create-room-btn" title="Create a new room">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                </button>
-              </div>
-              <div class="contact-list">
-                @if (isLoadingRooms) {
-                  <div class="loading-row"><div class="spinner"></div><span>Loading rooms…</span></div>
-                }
-                @if (!isLoadingRooms && rooms.length === 0) {
-                  <div class="list-empty">
-                    <div class="empty-icon-sm">🏠</div>
-                    <p>No rooms yet.<br/>Click <b>+</b> to create your first room.</p>
-                  </div>
-                }
-                @for (r of filteredRooms; track r.roomId) {
-                  <div class="contact-item" [class.selected]="selectedRoom?.roomId===r.roomId" (click)="selectRoom(r)">
-                    <div class="room-icon" [style.background]="getRoomColor(r)">{{ getRoomInitial(r) }}</div>
-                    <div class="ci-info">
-                      <div class="ci-top">
-                        <span class="ci-name">{{ r.name }}</span>
-                        <span class="ci-role-badge" [class.admin-badge]="r.currentUserRole === 'ADMIN'">
-                          {{ r.currentUserRole }}
-                        </span>
-                      </div>
-                      <div class="ci-bottom">
-                        <span class="ci-msg">{{ r.memberCount }} members</span>
-                        @if (r.unreadCount > 0) { <span class="ci-badge">{{ r.unreadCount }}</span> }
-                      </div>
-                    </div>
-                  </div>
-                }
-              </div>
-            }
-          </div>
-
-          <!-- Center: Message Thread -->
-          @if (selectedContact || selectedRoom) {
-            <div class="message-panel">
-              <div class="msg-header">
-                <div class="msg-h-left">
-                  @if (selectedContact) {
-                    <div class="msg-h-avatar-wrap">
-                      <div class="msg-h-avatar">
-                        @if (selectedContact.avatarUrl) { <img [src]="selectedContact.avatarUrl" class="avatar-img"/> }
-                        @else { {{ selectedContact.avatar }} }
-                      </div>
-                      <span class="presence-dot presence-dot-lg"
-                            [class.dot-online]="(presenceMap.get(selectedContact.userId ?? '')?.status ?? 'OFFLINE') === 'ONLINE'"
-                            [class.dot-away]="(presenceMap.get(selectedContact.userId ?? '')?.status ?? 'OFFLINE') === 'AWAY'"
-                            [class.dot-offline]="!(presenceMap.get(selectedContact.userId ?? '')?.status) || (presenceMap.get(selectedContact.userId ?? '')?.status) === 'OFFLINE'">
-                      </span>
-                    </div>
-                  }
-                  @if (selectedRoom) {
-                    <div class="msg-h-avatar room-av" [style.background]="getRoomColor(selectedRoom)">
-                      {{ getRoomInitial(selectedRoom) }}
-                    </div>
-                  }
-                  <div>
-                    <div class="msg-h-name">{{ selectedContact?.name || selectedRoom?.name }}</div>
-                    <div class="msg-h-sub">
-                      @if (selectedContact) {
-                        <span class="live-status-label"
-                              [class.label-online]="(presenceMap.get(selectedContact.userId ?? '')?.status ?? 'OFFLINE') === 'ONLINE'"
-                              [class.label-away]="(presenceMap.get(selectedContact.userId ?? '')?.status ?? 'OFFLINE') === 'AWAY'"
-                              [class.label-offline]="!(presenceMap.get(selectedContact.userId ?? '')?.status) || (presenceMap.get(selectedContact.userId ?? '')?.status) === 'OFFLINE'">
-                          {{ presenceMap.get(selectedContact.userId ?? '')?.status ?? 'Offline' | titlecase }}
-                        </span>
-                      }
-                      @if (selectedRoom) { {{ selectedRoom.memberCount }} members &middot; {{ myRoomRole }} }
-                    </div>
-                  </div>
-                </div>
-                <div class="msg-h-actions">
-                  @if (selectedRoom) {
-                    <button class="icon-btn-sm" (click)="toggleMsgSearch()" title="Search messages">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    </button>
-                    <button class="leave-room-btn" (click)="leaveRoom()" title="Leave room">Leave</button>
-                  }
-                </div>
-              </div>
-
-
-              <!-- Search bar (toggled) -->
-              @if (showMsgSearch) {
-                <div class="msg-search-bar">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                  <input type="text" [(ngModel)]="msgSearchQuery" placeholder="Search in conversation…"
-                         (keydown.enter)="doMsgSearch()" (keydown.escape)="toggleMsgSearch()" class="msg-search-input" id="msg-search-input"/>
-                  <button class="icon-btn-sm" (click)="doMsgSearch()">Go</button>
-                  <button class="icon-btn-sm" (click)="toggleMsgSearch()">✕</button>
-                </div>
-              }
-              <!-- Search results overlay -->
-              @if (msgSearchResults.length > 0) {
-                <div class="search-results-panel">
-                  <div class="srp-header"><span>{{ msgSearchResults.length }} results</span><button (click)="msgSearchResults=[]" class="icon-btn-sm">✕</button></div>
-                  @for (r of msgSearchResults; track r.id) {
-                    <div class="srp-row">
-                      <span class="srp-sender">{{ r.sender || 'You' }}</span>
-                      <span class="srp-text">{{ r.text }}</span>
-                      <span class="srp-time">{{ r.time }}</span>
-                    </div>
-                  }
-                </div>
-              }
-
-              <div class="messages-body" (click)="closeContextMenu()">
-                @if (isLoadingMessages) {
-                  <div class="loading-row center"><div class="spinner"></div><span>Loading messages…</span></div>
-                }
-                @if (!isLoadingMessages && messages.length === 0 && selectedContact) {
-                  <div class="empty-conversation">
-                    <div class="ec-emoji">👋</div>
-                    <p class="ec-text">Send <strong>Hi</strong> to start a conversation with <strong>{{ selectedContact.name }}</strong></p>
-                  </div>
-                }
-                @if (!isLoadingMessages && messages.length === 0 && selectedRoom) {
-                  <div class="no-messages">
-                    <div class="empty-icon-sm">💬</div>
-                    <p>No messages yet. Say hello!</p>
-                  </div>
-                }
-                @for (m of messages; track m.id) {
-                  <div class="msg-bubble" [class.mine]="m.mine" [class.deleted-msg]="m.isDeleted">
-                    @if (!m.mine && m.avatar) {
-                      <div class="bubble-avatar">{{ m.avatar }}</div>
+                    @if (isPremium) {
+                    <img src="premium-badge.svg" class="premium-badge" title="ConnectHub Premium member" alt="Premium" />
                     }
-                    <div class="bubble-content">
-                      <!-- Sender name only above received messages -->
-                      @if (!m.mine) {
-                        <div class="bubble-sender">
-                          {{ selectedContact ? selectedContact.name : m.sender }}
+                </div>
+            </div>
+        </header>
+
+        <div class="content-area">
+
+            <!-- ══ HOME TAB ══════════════════════════════════════════════ -->
+            @if (activeTab === 'home') {
+            <div class="tab-panel">
+                <div class="home-panel">
+                    <div class="home-welcome">
+                        <div class="welcome-avatar">
+                            @if (avatarUrl && !myAvatarFailed) { <img [src]="avatarUrl" class="avatar-img-lg"
+                                (error)="myAvatarFailed=true" /> }
+                            @else { {{ avatarLetter }} }
                         </div>
-                      }
-                      <!-- Reply preview -->
-                      @if (m.replyToMessageId) {
-                        <div class="reply-preview">↩ Replying to a message</div>
-                      }
-                      <!-- Inline edit mode -->
-                      @if (editingMessageId === ('' + m.id)) {
-                        <div class="edit-inline">
-                          <input [(ngModel)]="editContent" class="edit-input" (keydown.enter)="confirmEdit()" (keydown.escape)="cancelEdit()"/>
-                          <button class="edit-confirm-btn" (click)="confirmEdit()">Save</button>
-                          <button class="edit-cancel-btn" (click)="cancelEdit()">✕</button>
+                        <div>
+                            <h2>Good day, {{ fullName || username || 'there' }}! 👋</h2>
+                            <p>Welcome back to ConnectHub.</p>
+                            @if (isProfileLoading) { <span class="loading-chip">Syncing profile…</span> }
                         </div>
-                      } @else {
-                        <div class="bubble-text" [class.deleted-text]="m.isDeleted">
-                          @if (m.mediaUrl) {
-                            @if (m.mediaType === 'IMAGE') {
-                              <img [src]="resolveMediaUrl(m.mediaUrl)" class="bubble-img"
-                                   (click)="$event.stopPropagation(); openLightbox(m.mediaUrl!)"
-                                   title="Click to expand"/>
-                            } @else if (m.mediaType === 'VIDEO') {
-                              <video [src]="resolveMediaUrl(m.mediaUrl)" controls class="bubble-video"></video>
-                            }
-                            <!-- Only show text if it's a real caption, not a placeholder -->
-                            @if (!m.isDeleted && m.text !== '[Image]' && m.text !== '[Video]') {
-                              <span class="bubble-caption">{{ m.text }}</span>
-                            }
-                            @if (m.isDeleted) { {{ m.text }} }
-                          } @else {
-                            {{ m.text }}
-                          }
+                    </div>
+                    <div class="stat-cards">
+                        <div class="stat-card">
+                            <span class="stat-icon">👥</span>
+                            <div><span class="stat-num">{{ contacts.length }}</span><span
+                                    class="stat-label">Contacts</span></div>
                         </div>
-                      }
-                      <div class="bubble-meta">
-                        <span class="bubble-time">{{ m.time }}</span>
-                        @if (m.isEdited && !m.isDeleted) { <span class="edited-label">(edited)</span> }
-                        @if (m.mine) {
-                          <span class="delivery-tick"
-                                [class.tick-sent]="deliveryIcon(m.deliveryStatus) === 'sent'"
-                                [class.tick-delivered]="deliveryIcon(m.deliveryStatus) === 'delivered'"
-                                [class.tick-read]="deliveryIcon(m.deliveryStatus) === 'read'"
-                                [title]="m.deliveryStatus || 'SENT'">
-                            @if (deliveryIcon(m.deliveryStatus) === 'sent') { ✓ }
-                            @else { ✓✓ }
-                          </span>
-                        }
-                      </div>
+                        <div class="stat-card">
+                            <span class="stat-icon">🏠</span>
+                            <div><span class="stat-num">{{ rooms.length }}</span><span class="stat-label">Rooms</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-icon">💬</span>
+                            <div><span class="stat-num">{{ totalUnread }}</span><span class="stat-label">Unread</span>
+                            </div>
+                        </div>
                     </div>
-                    <!-- Context menu for own messages -->
-                    @if (m.mine && !m.isDeleted) {
-                      <div class="bubble-actions">
-                        <button class="ba-btn" (click)="$event.stopPropagation(); toggleContextMenu('' + m.id)" title="Actions">⋯</button>
-                        @if (activeContextMenu === ('' + m.id)) {
-                          <div class="ctx-menu">
-                            <button (click)="startReply(m)">↩ Reply</button>
-                            <button (click)="startEdit(m)">✏ Edit</button>
-                            <button class="ctx-delete" (click)="deleteOwnMessage(m)">🗑 Delete</button>
-                          </div>
-                        }
-                      </div>
-                    }
-                    @if (!m.mine) {
-                      <div class="bubble-actions">
-                        <button class="ba-btn" (click)="$event.stopPropagation(); startReply(m)" title="Reply">↩</button>
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-
-              <!-- Reply bar -->
-              @if (replyTo) {
-                <div class="reply-bar">
-                  <div class="reply-bar-content">
-                    <span class="reply-bar-label">↩ Replying to <b>{{ replyTo.mine ? 'yourself' : replyTo.sender }}</b></span>
-                    <span class="reply-bar-preview">{{ replyTo.text | slice:0:60 }}{{ replyTo.text.length > 60 ? '…' : '' }}</span>
-                  </div>
-                  <button class="reply-bar-close" (click)="cancelReply()">✕</button>
-                </div>
-              }
-
-              <!-- File Preview Bar -->
-              @if (selectedFile) {
-                <div class="file-preview-bar">
-                  <div class="fp-preview">
-                    @if (filePreview) { <img [src]="filePreview" class="fp-thumb"/> }
-                    @else { <div class="fp-icon">📄</div> }
-                    <div class="fp-info">
-                      <span class="fp-name">{{ selectedFile.name }}</span>
-                      <span class="fp-size">{{ (selectedFile.size / 1024).toFixed(1) }} KB</span>
-                    </div>
-                  </div>
-                  <button class="fp-cancel" (click)="cancelFile()">✕</button>
-                </div>
-              }
-
-              <div class="input-bar">
-                <button class="input-icon-btn" title="Emoji">😊</button>
-                
-                <!-- Attachment -->
-                <button class="input-icon-btn attachment-btn" (click)="fileInput.click()" title="Attach photo or video">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                </button>
-                <input type="file" #fileInput id="file-input-hidden"
-                       (change)="onFileSelected($event)" style="display:none"/>
-
-                <input type="text" [(ngModel)]="newMessage" placeholder="Type a message…"
-                       (keydown.enter)="selectedFile ? uploadAndSend() : sendMessage()" id="message-input" class="msg-input"/>
-                
-                <button class="send-btn" (click)="selectedFile ? uploadAndSend() : sendMessage()" id="send-message-btn">
-                  @if (selectedFile) {
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                  } @else {
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                  }
-                </button>
-              </div>
-            </div>
-          } @else {
-            <div class="message-panel empty-state">
-              <div class="empty-icon">💬</div>
-              <h3>Select a conversation</h3>
-              <p>Choose a contact or room from the left panel</p>
-            </div>
-          }
-
-          <!-- Right Panel: Contact Info OR Room Members -->
-          @if (selectedContact) {
-            <div class="info-panel">
-              <div class="ip-avatar">
-                @if (selectedContact.avatarUrl) { <img [src]="selectedContact.avatarUrl" class="avatar-img-lg"/> }
-                @else { {{ selectedContact.avatar }} }
-              </div>
-              <div class="ip-name">{{ selectedContact.name }}</div>
-              <div class="ip-role">{{ selectedContact.role || 'Member' }}</div>
-              @if (selectedContact.email) {
-                <div class="ip-contact-detail"><label>Email</label><span>{{ selectedContact.email }}</span></div>
-              }
-
-              <!-- Media Gallery for DM -->
-              <div class="ip-section-title media-title">
-                <span>Media ({{ roomMedia.length }})</span>
-              </div>
-              <div class="media-grid">
-                @if (isMediaLoading) {
-                  <div class="loading-grid"><div class="spinner-sm"></div></div>
-                }
-                @for (m of roomMedia | slice:0:6; track m.mediaId) {
-                  <div class="media-item" (click)="openLightbox(m.url)">
-                    @if (m.mimeType.startsWith('image/')) {
-                      <img [src]="resolveMediaUrl(m.thumbnailUrl || m.url)" alt="media"/>
-                    } @else {
-                      <div class="video-thumb"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
-                    }
-                    <div class="media-item-overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div>
-                  </div>
-                }
-                @if (!isMediaLoading && roomMedia.length === 0) {
-                  <p class="no-media-text">No media shared yet</p>
-                }
-              </div>
-            </div>
-          }
-
-          @if (selectedRoom && !selectedContact) {
-            <div class="info-panel room-info">
-              <div class="ip-avatar room-av" [style.background]="getRoomColor(selectedRoom)">
-                {{ getRoomInitial(selectedRoom) }}
-              </div>
-              <div class="ip-name">{{ selectedRoom.name }}</div>
-              <div class="ip-role">{{ selectedRoom.memberCount }} members</div>
-              @if (selectedRoom.description) {
-                <div class="ip-desc">{{ selectedRoom.description }}</div>
-              }
-              <div class="ip-section-title">Members</div>
-              @if (isLoadingMembers) {
-                <div class="loading-row"><div class="spinner"></div><span>Loading…</span></div>
-              }
-              <div class="member-list">
-                @for (m of roomMembers; track m.userId) {
-                  <div class="member-row">
-                    <div class="member-av" [class]="getStatusClass(m.status)">
-                      @if (m.avatarUrl) { <img [src]="m.avatarUrl" class="avatar-img-sm"/> }
-                      @else { {{ getMemberAvatarLetter(m) }} }
-                    </div>
-                    <div class="member-info">
-                      <span class="member-name">{{ m.fullName || m.username || m.userId }}</span>
-                      <span class="member-role-tag" [class.admin-tag]="m.role === 'ADMIN'">{{ m.role }}</span>
-                    </div>
-                    <!-- Admin actions — only shown to admins, not on themselves -->
-                    @if (myRoomRole === 'ADMIN' && m.userId !== userId) {
-                      <div class="member-actions">
-                        @if (m.role === 'MEMBER') {
-                          <button class="mem-action-btn promote-btn" (click)="makeAdmin(m.userId)" title="Make Admin">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                          </button>
-                        }
-                        @if (m.role === 'ADMIN') {
-                          <button class="mem-action-btn demote-btn" (click)="removeAdmin(m.userId)" title="Remove Admin">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                          </button>
-                        }
-                        <button class="mem-action-btn remove-btn" (click)="removeMemberFromRoom(m.userId)" title="Remove from room">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    <div class="quick-actions">
+                        <button class="qa-btn" (click)="activeTab='people'">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                            </svg>
+                            Find People
                         </button>
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-
-              <!-- Media Gallery -->
-              <div class="ip-section-title media-title">
-                <span>Media ({{ roomMedia.length }})</span>
-                <a href="javascript:void(0)" class="see-all">See all ›</a>
-              </div>
-              <div class="media-grid">
-                @if (isMediaLoading) {
-                  <div class="loading-grid"><div class="spinner-sm"></div></div>
-                }
-                @for (m of roomMedia | slice:0:6; track m.mediaId) {
-                  <div class="media-item" (click)="openLightbox(m.url)">
-                    @if (m.mimeType.startsWith('image/')) {
-                      <img [src]="resolveMediaUrl(m.thumbnailUrl || m.url)" alt="media"/>
-                    } @else {
-                      <div class="video-thumb"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
-                    }
-                    <div class="media-item-overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div>
-                  </div>
-                }
-                @if (!isMediaLoading && roomMedia.length === 0) {
-                  <p class="no-media-text">No media shared yet</p>
-                }
-              </div>
+                        <button class="qa-btn" (click)="activeTab='chat'; chatMode='room'">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                            </svg>
+                            My Rooms
+                        </button>
+                    </div>
+                </div>
             </div>
-          }
+            }
+
+            <!-- ══ PEOPLE TAB ════════════════════════════════════════════ -->
+            @if (activeTab === 'people') {
+            <div class="tab-panel">
+                <div class="people-panel">
+                    <div class="people-header">
+                        <h2>People</h2>
+                        <div class="people-search-wrap">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8" />
+                                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
+                            <input type="text" [value]="peopleSearch"
+                                (input)="onPeopleSearch($any($event.target).value)"
+                                placeholder="Search users by username…" id="people-search-input" />
+                        </div>
+                    </div>
+
+                    @if (isPeopleLoading) {
+                    <div class="loading-row">
+                        <div class="spinner"></div><span>Searching users…</span>
+                    </div>
+                    }
+                    @if (!isPeopleLoading && peopleSearched && searchResults.length === 0) {
+                    <div class="empty-tab" style="height:200px">
+                        <div class="empty-icon">🔍</div>
+                        <h3>No users found</h3>
+                        <p>Try a different username</p>
+                    </div>
+                    }
+                    @if (!peopleSearched && !peopleSearch) {
+                    <p class="search-hint">Type a username to find people on ConnectHub</p>
+                    }
+                    <div class="people-grid">
+                        @for (u of displayedPeople; track u.userId) {
+                        <div class="person-card">
+                            <div class="person-avatar" [class]="getStatusClass(u.status)">
+                                @if (u.avatarUrl && !u.avatarImgError) { <img [src]="u.avatarUrl" class="avatar-img"
+                                    (error)="u.avatarImgError=true" /> }
+                                @else { {{ getAvatarLetter(u) }} }
+                            </div>
+                            <div class="person-info">
+                                <span class="person-name">{{ u.fullName || u.username }}</span>
+                                <span class="person-role">&#64;{{ u.username }}</span>
+                                <span class="person-status" [class]="'dot-' + (u.status || 'offline').toLowerCase()">
+                                    {{ (u.status || 'offline').toLowerCase() }}
+                                </span>
+                            </div>
+                            <button class="msg-btn" (click)="messagePerson(u)">Message</button>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            }
+
+            <!-- ══ CHAT TAB ══════════════════════════════════════════════ -->
+            @if (activeTab === 'chat') {
+            <div class="tab-panel chat-layout">
+
+                <!-- Left: Contact/Room List -->
+                <div class="chat-list-panel" [class.mobile-hidden]="mobileShowChat">
+                    <div class="list-header">
+                        <h2>Chat</h2>
+                        <div class="mode-toggle">
+                            <button [class.active]="chatMode==='individual'" (click)="chatMode='individual'"
+                                id="toggle-individual">Individual</button>
+                            <button [class.active]="chatMode==='room'" (click)="chatMode='room'" id="toggle-room">Room
+                                Chat</button>
+                        </div>
+                    </div>
+                    <div class="list-search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input type="text" [(ngModel)]="searchQuery" placeholder="Search…" id="chat-search-input" />
+                    </div>
+
+                    <!-- INDIVIDUAL MODE -->
+                    @if (chatMode === 'individual') {
+                    <div class="contact-list">
+                        @if (contacts.length === 0) {
+                        <div class="list-empty">
+                            <div class="empty-icon-sm">👥</div>
+                            <p>No conversations yet.<br />Go to <b>People</b> to find someone to chat with.</p>
+                        </div>
+                        }
+                        @for (c of filteredContacts; track c.id) {
+                        <div class="contact-item" [class.selected]="selectedContact?.id===c.id"
+                            (click)="selectContact(c)">
+                            <div class="ci-avatar-wrap">
+                                <div class="ci-avatar">{{ c.avatar }}</div>
+                                <!-- Live presence dot — updates from PresenceService.presence$ -->
+                                <span class="presence-dot"
+                                    [class.dot-online]="(presenceMap.get(c.userId ?? '')?.status ?? 'OFFLINE') === 'ONLINE'"
+                                    [class.dot-away]="(presenceMap.get(c.userId ?? '')?.status ?? 'OFFLINE') === 'AWAY'"
+                                    [class.dot-offline]="!(presenceMap.get(c.userId ?? '')?.status) || (presenceMap.get(c.userId ?? '')?.status) === 'OFFLINE'"
+                                    [title]="presenceMap.get(c.userId ?? '')?.status ?? 'OFFLINE'">
+                                </span>
+                            </div>
+                            <div class="ci-info">
+                                <div class="ci-top"><span class="ci-name">{{ c.name }}</span><span class="ci-time">{{
+                                        c.time }}</span></div>
+                                <div class="ci-bottom">
+                                    <span class="ci-msg">{{ c.lastMsg || 'Start a conversation' }}</span>
+                                    @if (c.unread > 0) { <span class="ci-badge">{{ c.unread }}</span> }
+                                </div>
+                            </div>
+                            <!-- Hover delete button -->
+                            <button class="ci-delete-btn" (click)="deleteContact(c, $event)" title="Remove conversation">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6" />
+                                    <path d="M19 6l-1 14H6L5 6" />
+                                    <path d="M10 11v6M14 11v6" />
+                                    <path d="M9 6V4h6v2" />
+                                </svg>
+                            </button>
+                        </div>
+                        }
+                    </div>
+                    }
+
+                    <!-- ROOM MODE -->
+                    @if (chatMode === 'room') {
+                    <div class="room-list-header">
+                        <span class="room-list-title">My Rooms</span>
+                        @if (isPremium) {
+                        <button class="create-room-btn" (click)="openCreateRoom()" id="create-room-btn"
+                            title="Create a new room">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                        </button>
+                        } @else {
+                        <button class="create-room-btn create-room-locked" (click)="openUpgradeModal()"
+                            title="✨ Upgrade to Premium to create group rooms" id="create-room-btn-locked">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
+                        </button>
+                        }
+                    </div>
+                    <div class="contact-list">
+                        @if (isLoadingRooms) {
+                        <div class="loading-row">
+                            <div class="spinner"></div><span>Loading rooms…</span>
+                        </div>
+                        }
+                        @if (!isLoadingRooms && rooms.length === 0) {
+                        <div class="list-empty">
+                            <div class="empty-icon-sm">🏠</div>
+                            <p>No rooms yet.<br />Click <b>+</b> to create your first room.</p>
+                        </div>
+                        }
+                        @for (r of filteredRooms; track r.roomId) {
+                        <div class="contact-item" [class.selected]="selectedRoom?.roomId===r.roomId"
+                            (click)="selectRoom(r)">
+                            <div class="room-icon" [style.background]="getRoomColor(r)">{{ getRoomInitial(r) }}</div>
+                            <div class="ci-info">
+                                <div class="ci-top">
+                                    <span class="ci-name">{{ r.name }}</span>
+                                    <span class="ci-role-badge" [class.admin-badge]="r.currentUserRole === 'ADMIN'">
+                                        {{ r.currentUserRole }}
+                                    </span>
+                                </div>
+                                <div class="ci-bottom">
+                                    <span class="ci-msg">{{ r.lastMessage ?? (r.memberCount + ' members') }}</span>
+                                    @if (r.unreadCount > 0) { <span class="ci-badge">{{ r.unreadCount }}</span> }
+                                </div>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+
+                <!-- Center: Message Thread -->
+                @if (selectedContact || selectedRoom) {
+                <div class="message-panel" [class.mobile-active]="mobileShowChat">
+                    <div class="msg-header">
+                        <!-- Mobile back button -->
+                        <button class="mobile-back-btn" (click)="mobileBack()" aria-label="Back">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="15 18 9 12 15 6" />
+                            </svg>
+                        </button>
+                        <div class="msg-h-left">
+                            @if (selectedContact) {
+                            <div class="msg-h-avatar-wrap">
+                                <div class="msg-h-avatar">
+                                    @if (selectedContact.avatarUrl && !selectedContact.avatarImgError) {
+                                    <img [src]="selectedContact.avatarUrl" class="avatar-img"
+                                        (error)="selectedContact.avatarImgError=true" /> }
+                                    @else { {{ selectedContact.avatar }} }
+                                </div>
+                                <span class="presence-dot presence-dot-lg"
+                                    [class.dot-online]="(presenceMap.get(selectedContact.userId ?? '')?.status ?? 'OFFLINE') === 'ONLINE'"
+                                    [class.dot-away]="(presenceMap.get(selectedContact.userId ?? '')?.status ?? 'OFFLINE') === 'AWAY'"
+                                    [class.dot-offline]="!(presenceMap.get(selectedContact.userId ?? '')?.status) || (presenceMap.get(selectedContact.userId ?? '')?.status) === 'OFFLINE'">
+                                </span>
+                            </div>
+                            }
+                            @if (selectedRoom) {
+                            <div class="msg-h-avatar room-av" [style.background]="getRoomColor(selectedRoom)">
+                                {{ getRoomInitial(selectedRoom) }}
+                            </div>
+                            }
+                            <div>
+                                <div class="msg-h-name">{{ selectedContact?.name || selectedRoom?.name }}</div>
+                                <div class="msg-h-sub">
+                                    @if (selectedContact) {
+                                    <span class="live-status-label"
+                                        [class.label-online]="(presenceMap.get(selectedContact.userId ?? '')?.status ?? 'OFFLINE') === 'ONLINE'"
+                                        [class.label-away]="(presenceMap.get(selectedContact.userId ?? '')?.status ?? 'OFFLINE') === 'AWAY'"
+                                        [class.label-offline]="!(presenceMap.get(selectedContact.userId ?? '')?.status) || (presenceMap.get(selectedContact.userId ?? '')?.status) === 'OFFLINE'">
+                                        {{ presenceMap.get(selectedContact.userId ?? '')?.status ?? 'Offline' |
+                                        titlecase }}
+                                    </span>
+                                    }
+                                    @if (selectedRoom) { {{ selectedRoom.memberCount }} members &middot; {{ myRoomRole
+                                    }} }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="msg-h-actions">
+                            <!-- ── Close chat (X) button ── -->
+                            <button class="icon-btn-sm close-chat-btn" (click)="closeChat()" title="Close conversation">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <line x1="18" y1="6" x2="6" y2="18"/>
+                                    <line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
+                            @if (selectedRoom) {
+                            <button class="icon-btn-sm" (click)="toggleMsgSearch()" title="Search messages">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8" />
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                                </svg>
+                            </button>
+                            <button class="leave-room-btn" (click)="leaveRoom()" title="Leave room">Leave</button>
+                            }
+                            <!-- Media button — visible only on mobile (info panel hidden) -->
+                            <button class="icon-btn-sm mob-media-btn" (click)="mobileShowMedia=!mobileShowMedia"
+                                title="Shared Media">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                                    <circle cx="8.5" cy="8.5" r="1.5" />
+                                    <polyline points="21 15 16 10 5 21" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+
+                    <!-- Search bar (toggled) -->
+                    @if (showMsgSearch) {
+                    <div class="msg-search-bar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input type="text" [(ngModel)]="msgSearchQuery" placeholder="Search in conversation…"
+                            (keydown.enter)="doMsgSearch()" (keydown.escape)="toggleMsgSearch()"
+                            class="msg-search-input" id="msg-search-input" />
+                        <button class="icon-btn-sm" (click)="doMsgSearch()">Go</button>
+                        <button class="icon-btn-sm" (click)="toggleMsgSearch()">✕</button>
+                    </div>
+                    }
+                    <!-- Search results overlay -->
+                    @if (msgSearchResults.length > 0) {
+                    <div class="search-results-panel">
+                        <div class="srp-header"><span>{{ msgSearchResults.length }} results</span><button
+                                (click)="msgSearchResults=[]" class="icon-btn-sm">✕</button></div>
+                        @for (r of msgSearchResults; track r.id) {
+                        <div class="srp-row">
+                            <span class="srp-sender">{{ r.sender || 'You' }}</span>
+                            <span class="srp-text">{{ r.text }}</span>
+                            <span class="srp-time">{{ r.time }}</span>
+                        </div>
+                        }
+                    </div>
+                    }
+
+                    <div class="messages-body" (click)="closeContextMenu()">
+                        @if (isLoadingMessages) {
+                        <div class="loading-row center">
+                            <div class="spinner"></div><span>Loading messages…</span>
+                        </div>
+                        }
+                        @if (!isLoadingMessages && messages.length === 0 && selectedContact) {
+                        <div class="empty-conversation">
+                            <div class="ec-emoji">👋</div>
+                            <p class="ec-text">Send <strong>Hi</strong> to start a conversation with <strong>{{
+                                    selectedContact.name }}</strong></p>
+                        </div>
+                        }
+                        @if (!isLoadingMessages && messages.length === 0 && selectedRoom) {
+                        <div class="no-messages">
+                            <div class="empty-icon-sm">💬</div>
+                            <p>No messages yet. Say hello!</p>
+                        </div>
+                        }
+                        <!-- ── Pinned Message Banner (PREMIUM) ─────────────────────────────── -->
+                        @if (pinnedMessage && selectedRoom) {
+                        <div class="pinned-banner" id="pinned-message-banner">
+                            <span class="pin-icon">📌</span>
+                            <div class="pin-content">
+                                <span class="pin-label">Pinned message</span>
+                                <span class="pin-preview">{{ pinnedMessage.text | slice:0:80 }}{{
+                                    (pinnedMessage.text.length) > 80 ? '…' : '' }}</span>
+                            </div>
+                            @if (isPremium && myRoomRole === 'ADMIN') {
+                            <button class="pin-dismiss" (click)="unpinMessage()" title="Unpin">✕</button>
+                            }
+                        </div>
+                        }
+
+                        @for (m of messages; track m.id) {
+                        <div class="msg-bubble" [class.mine]="m.mine" [class.deleted-msg]="m.isDeleted">
+                            @if (!m.mine && m.avatar) {
+                            <div class="bubble-avatar">{{ m.avatar }}</div>
+                            }
+                            <div class="bubble-content">
+                                <!-- Sender name only above received messages -->
+                                @if (!m.mine) {
+                                <div class="bubble-sender">
+                                    {{ selectedContact ? selectedContact.name : m.sender }}
+                                </div>
+                                }
+                                <!-- Reply preview -->
+                                @if (m.replyToMessageId) {
+                                <div class="reply-preview">↩ Replying to a message</div>
+                                }
+                                <!-- Inline edit mode -->
+                                @if (editingMessageId === ('' + m.id)) {
+                                <div class="edit-inline">
+                                    <input [(ngModel)]="editContent" class="edit-input" (keydown.enter)="confirmEdit()"
+                                        (keydown.escape)="cancelEdit()" />
+                                    <button class="edit-confirm-btn" (click)="confirmEdit()">Save</button>
+                                    <button class="edit-cancel-btn" (click)="cancelEdit()">✕</button>
+                                </div>
+                                } @else {
+                                <div class="bubble-text" [class.deleted-text]="m.isDeleted">
+                                    @if (m.mediaUrl) {
+                                    @if (m.mediaType === 'IMAGE') {
+                                    <!-- Bug 2 fix: pass mediaType so lightbox renders <img> not <video> -->
+                                    <img [src]="resolveMediaUrl(m.mediaUrl)" class="bubble-img"
+                                        (click)="$event.stopPropagation(); openLightbox(m.mediaUrl!, m.mediaType)"
+                                        alt="Shared image" loading="lazy" />
+                                    } @else if (m.mediaType === 'VIDEO') {
+                                    <!-- Bug 2 fix: inline video plays correctly; click also opens fullscreen lightbox -->
+                                    <video [src]="resolveMediaUrl(m.mediaUrl)" controls class="bubble-video"
+                                        preload="metadata"
+                                        (click)="$event.stopPropagation(); openLightbox(m.mediaUrl!, 'VIDEO')">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                    } @else if (m.mediaType === 'FILE') {
+                                    <a [href]="resolveMediaUrl(m.mediaUrl)" target="_blank" rel="noopener"
+                                        class="bubble-file-link">
+                                        📎 {{ m.text || 'Download file' }}
+                                    </a>
+                                    }
+                                    <!-- Only show text if it's a real caption, not a placeholder -->
+                                    @if (!m.isDeleted && m.text !== '[Image]' && m.text !== '[Video]') {
+                                    <span class="bubble-caption">{{ m.text }}</span>
+                                    }
+                                    @if (m.isDeleted) { {{ m.text }} }
+                                    } @else {
+                                    {{ m.text }}
+                                    }
+                                </div>
+                                }
+                                <div class="bubble-meta">
+                                    <span class="bubble-time">{{ m.time }}</span>
+                                    @if (m.isEdited && !m.isDeleted) { <span class="edited-label">(edited)</span> }
+                                    @if (m.mine) {
+                                    <span class="delivery-tick"
+                                        [class.tick-sent]="deliveryIcon(m.deliveryStatus) === 'sent'"
+                                        [class.tick-delivered]="deliveryIcon(m.deliveryStatus) === 'delivered'"
+                                        [class.tick-read]="deliveryIcon(m.deliveryStatus) === 'read'"
+                                        [title]="m.deliveryStatus || 'SENT'">
+                                        @if (deliveryIcon(m.deliveryStatus) === 'sent') { &#10003; }
+                                        @else { &#10003;&#10003; }
+                                    </span>
+                                    }
+                                </div>
+                            </div>
+                            <!-- Context menu for own messages -->
+                            @if (m.mine && !m.isDeleted) {
+                            <div class="bubble-actions">
+                                <button class="ba-btn" (click)="$event.stopPropagation(); toggleContextMenu('' + m.id)"
+                                    title="Actions">⋯</button>
+                                @if (activeContextMenu === ('' + m.id)) {
+                                <div class="ctx-menu">
+                                    <button (click)="startReply(m)">↩ Reply</button>
+                                    <button (click)="startEdit(m)">✏ Edit</button>
+                                    @if (isPremium && selectedRoom && myRoomRole === 'ADMIN') {
+                                    <button (click)="pinMessage(m)">📌 {{ m.isPinned ? 'Unpin' : 'Pin' }}</button>
+                                    }
+                                    <button class="ctx-delete" (click)="deleteOwnMessage(m)">🗑 Delete</button>
+                                </div>
+                                }
+
+                            </div>
+                            }
+                            @if (!m.mine) {
+                            <div class="bubble-actions">
+                                <button class="ba-btn" (click)="$event.stopPropagation(); startReply(m)"
+                                    title="Reply">↩</button>
+                                @if (isPremium && selectedRoom && myRoomRole === 'ADMIN' && !m.isDeleted) {
+                                <button class="ba-btn" (click)="$event.stopPropagation(); pinMessage(m)"
+                                    title="{{ m.isPinned ? 'Unpin' : 'Pin message' }}">📌</button>
+                                }
+                            </div>
+                            }
+
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Reply bar -->
+                    @if (replyTo) {
+                    <div class="reply-bar">
+                        <div class="reply-bar-content">
+                            <span class="reply-bar-label">↩ Replying to <b>{{ replyTo.mine ? 'yourself' : replyTo.sender
+                                    }}</b></span>
+                            <span class="reply-bar-preview">{{ replyTo.text | slice:0:60 }}{{ replyTo.text.length > 60 ?
+                                '…' : '' }}</span>
+                        </div>
+                        <button class="reply-bar-close" (click)="cancelReply()">✕</button>
+                    </div>
+                    }
+
+                    <!-- File Preview Bar -->
+                    @if (selectedFile) {
+                    <div class="file-preview-bar">
+                        <div class="fp-preview">
+                            @if (filePreview) { <img [src]="filePreview" class="fp-thumb" /> }
+                            @else { <div class="fp-icon">📄</div> }
+                            <div class="fp-info">
+                                <span class="fp-name">{{ selectedFile.name }}</span>
+                                <span class="fp-size">{{ (selectedFile.size / 1024).toFixed(1) }} KB</span>
+                            </div>
+                        </div>
+                        <button class="fp-cancel" (click)="cancelFile()">✕</button>
+                    </div>
+                    }
+
+                    <!-- Typing indicator bar -->
+                    @if (typingLabel) {
+                    <div class="typing-bar">
+                        <div class="typing-dots"><span></span><span></span><span></span></div>
+                        <span class="typing-text">{{ typingLabel }}</span>
+                    </div>
+                    }
+
+                    <div class="input-bar">
+                        <!-- Emoji picker -->
+                        <div class="emoji-wrap">
+                            <button class="input-icon-btn" title="Emoji"
+                                (click)="$event.stopPropagation(); showEmojiPicker = !showEmojiPicker">😊</button>
+                            @if (showEmojiPicker) {
+                            <div class="emoji-picker">
+                                @for (e of emojiList; track e) {
+                                <button class="emoji-btn" (click)="insertEmoji(e)">{{ e }}</button>
+                                }
+                            </div>
+                            }
+                        </div>
+
+                        <!-- Attachment -->
+                        <button class="input-icon-btn attachment-btn" (click)="fileInput.click()"
+                            title="Attach photo or video">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path
+                                    d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                            </svg>
+                        </button>
+                        <input type="file" #fileInput id="file-input-hidden" (change)="onFileSelected($event)"
+                            style="display:none" />
+
+                        <input type="text" [(ngModel)]="newMessage" placeholder="Type a message…"
+                            (keydown.enter)="selectedFile ? uploadAndSend() : sendMessage()" (input)="onMessageInput()"
+                            id="message-input" class="msg-input" />
+
+                        <button class="send-btn" (click)="selectedFile ? uploadAndSend() : sendMessage()"
+                            id="send-message-btn">
+                            @if (selectedFile) {
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17 8 12 3 7 8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
+                            </svg>
+                            } @else {
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13" />
+                                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                            </svg>
+                            }
+                        </button>
+                    </div>
+                </div>
+                } @else {
+                <div class="message-panel empty-state">
+                    <div class="empty-icon">💬</div>
+                    <h3>Select a conversation</h3>
+                    <p>Choose a contact or room from the left panel</p>
+                </div>
+                }
+
+                <!-- Right Panel: Contact Info OR Room Members -->
+                @if (selectedContact) {
+                <div class="info-panel">
+                    <div class="ip-avatar">
+                        @if (selectedContact.avatarUrl) { <img [src]="selectedContact.avatarUrl"
+                            class="avatar-img-lg" /> }
+                        @else { {{ selectedContact.avatar }} }
+                    </div>
+                    <div class="ip-name">{{ selectedContact.name }}</div>
+                    <div class="ip-role">{{ selectedContact.role || 'Member' }}</div>
+                    @if (selectedContact.email) {
+                    <div class="ip-contact-detail"><label>Email</label><span>{{ selectedContact.email }}</span></div>
+                    }
+
+                    <!-- Media Gallery for DM -->
+                    <div class="ip-section-title media-title">
+                        <span>Media ({{ roomMedia.length }})</span>
+                    </div>
+                    <div class="media-grid">
+                        @if (isMediaLoading) {
+                        <div class="loading-grid">
+                            <div class="spinner-sm"></div>
+                        </div>
+                        }
+                        @for (m of roomMedia | slice:0:6; track m.mediaId) {
+                        <!-- Bug 2 fix: derive mediaType from mimeType so video thumbnails open a <video> lightbox -->
+                        <div class="media-item"
+                            (click)="openLightbox(m.url, m.mimeType.startsWith('video/') ? 'VIDEO' : 'IMAGE')">
+                            @if (m.mimeType.startsWith('image/')) {
+                            <img [src]="resolveMediaUrl(m.thumbnailUrl || m.url)" alt="media" />
+                            } @else {
+                            <div class="video-thumb"><svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M8 5v14l11-7z" />
+                                </svg></div>
+                            }
+                            <div class="media-item-overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                                </svg></div>
+                        </div>
+                        }
+                        @if (!isMediaLoading && roomMedia.length === 0) {
+                        <p class="no-media-text">No media shared yet</p>
+                        }
+                    </div>
+                </div>
+                }
+
+                @if (selectedRoom && !selectedContact) {
+                <div class="info-panel room-info">
+                    <div class="ip-avatar room-av" [style.background]="getRoomColor(selectedRoom)">
+                        {{ getRoomInitial(selectedRoom) }}
+                    </div>
+                    <div class="ip-name">{{ selectedRoom.name }}</div>
+                    <div class="ip-role">{{ selectedRoom.memberCount }} members</div>
+                    @if (selectedRoom.description) {
+                    <div class="ip-desc">{{ selectedRoom.description }}</div>
+                    }
+                    <div class="ip-section-title">Members</div>
+                    @if (isLoadingMembers) {
+                    <div class="loading-row">
+                        <div class="spinner"></div><span>Loading…</span>
+                    </div>
+                    }
+                    <div class="member-list">
+                        @for (m of roomMembers; track m.userId) {
+                        <div class="member-row">
+                            <div class="member-av" [class]="getStatusClass(m.status)">
+                                @if (m.avatarUrl) { <img [src]="m.avatarUrl" class="avatar-img-sm" /> }
+                                @else { {{ getMemberAvatarLetter(m) }} }
+                            </div>
+                            <div class="member-info">
+                                <span class="member-name">{{ m.fullName || m.username || m.userId }}</span>
+                                <span class="member-role-tag" [class.admin-tag]="m.role === 'ADMIN'">{{ m.role }}</span>
+                            </div>
+                            <!-- Admin actions — only shown to admins, not on themselves -->
+                            @if (myRoomRole === 'ADMIN' && m.userId !== userId) {
+                            <div class="member-actions">
+                                @if (m.role === 'MEMBER') {
+                                <button class="mem-action-btn promote-btn" (click)="makeAdmin(m.userId)"
+                                    title="Make Admin">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path
+                                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                    </svg>
+                                </button>
+                                }
+                                @if (m.role === 'ADMIN') {
+                                <button class="mem-action-btn demote-btn" (click)="removeAdmin(m.userId)"
+                                    title="Remove Admin">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="18" y1="6" x2="6" y2="18" />
+                                        <line x1="6" y1="6" x2="18" y2="18" />
+                                    </svg>
+                                </button>
+                                }
+                                <button class="mem-action-btn remove-btn" (click)="removeMemberFromRoom(m.userId)"
+                                    title="Remove from room">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                        <circle cx="8.5" cy="7" r="4" />
+                                        <line x1="23" y1="11" x2="17" y2="11" />
+                                    </svg>
+                                </button>
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Media Gallery -->
+                    <div class="ip-section-title media-title">
+                        <span>Media ({{ roomMedia.length }})</span>
+                        <a href="javascript:void(0)" class="see-all">See all ›</a>
+                    </div>
+                    <div class="media-grid">
+                        @if (isMediaLoading) {
+                        <div class="loading-grid">
+                            <div class="spinner-sm"></div>
+                        </div>
+                        }
+                        @for (m of roomMedia | slice:0:6; track m.mediaId) {
+                        <!-- Bug 2 fix: derive mediaType from mimeType so video thumbnails open a <video> lightbox -->
+                        <div class="media-item"
+                            (click)="openLightbox(m.url, m.mimeType.startsWith('video/') ? 'VIDEO' : 'IMAGE')">
+                            @if (m.mimeType.startsWith('image/')) {
+                            <img [src]="resolveMediaUrl(m.thumbnailUrl || m.url)" alt="media" />
+                            } @else {
+                            <div class="video-thumb"><svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M8 5v14l11-7z" />
+                                </svg></div>
+                            }
+                            <div class="media-item-overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                                </svg></div>
+                        </div>
+                        }
+                        @if (!isMediaLoading && roomMedia.length === 0) {
+                        <p class="no-media-text">No media shared yet</p>
+                        }
+                    </div>
+                </div>
+                }
+
+            </div>
+            }
+
+            <!-- ══ FILES TAB ══════════════════════════════════════════════ -->
+            @if (activeTab === 'files') {
+            <div class="tab-panel">
+                <div class="empty-tab">
+                    <div class="empty-icon">📁</div>
+                    <h3>Files</h3>
+                    <p>File sharing will be available soon.</p>
+                </div>
+            </div>
+            }
 
         </div>
-      }
-
-      <!-- ══ FILES TAB ══════════════════════════════════════════════ -->
-      @if (activeTab === 'files') {
-        <div class="tab-panel">
-          <div class="empty-tab">
-            <div class="empty-icon">📁</div>
-            <h3>Files</h3>
-            <p>File sharing will be available soon.</p>
-          </div>
-        </div>
-      }
-
     </div>
-  </div>
 </div>
 
 <!-- ════ Create Room Modal ════════════════════════════════════════ -->
 @if (showCreateRoom) {
-  <div class="modal-overlay" (click)="closeCreateRoom()">
+<div class="modal-overlay" (click)="closeCreateRoom()">
     <div class="modal-box" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Create New Room</h3>
-        <button class="modal-close" (click)="closeCreateRoom()">✕</button>
-      </div>
-
-      <div class="modal-body">
-        <label class="field-label">Room Name *</label>
-        <input type="text" [(ngModel)]="newRoomName" placeholder="e.g. Design Team, Backend Devs…"
-               class="modal-input" id="new-room-name" maxlength="100"/>
-
-        <label class="field-label">Description</label>
-        <textarea [(ngModel)]="newRoomDesc" placeholder="What is this room about?"
-                  class="modal-input modal-textarea" rows="2"></textarea>
-
-        <label class="field-label">Add Members</label>
-        <div class="member-search-wrap">
-          <input type="text" [value]="memberSearch"
-                 (input)="onMemberSearchInput($any($event.target).value)"
-                 placeholder="Search by username…"
-                 class="modal-input" id="member-search-input"/>
-          @if (memberSearching) { <div class="spinner-sm"></div> }
+        <div class="modal-header">
+            <h3>Create New Room</h3>
+            <button class="modal-close" (click)="closeCreateRoom()">✕</button>
         </div>
 
-        <!-- Search results -->
-        @if (memberResults.length > 0) {
-          <div class="member-search-results">
-            @for (u of memberResults; track u.userId) {
-              <div class="member-result-row" (click)="addPendingMember(u)">
-                <div class="mr-avatar">
-                  @if (u.avatarUrl) { <img [src]="u.avatarUrl" class="avatar-img-sm"/> }
-                  @else { {{ getAvatarLetter(u) }} }
-                </div>
-                <div class="mr-info">
-                  <span>{{ u.fullName || u.username }}</span>
-                  <small>&#64;{{ u.username }}</small>
-                </div>
-                <span class="add-chip">+ Add</span>
-              </div>
-            }
-          </div>
-        }
+        <div class="modal-body">
+            <label class="field-label">Room Name *</label>
+            <input type="text" [(ngModel)]="newRoomName" placeholder="e.g. Design Team, Backend Devs…"
+                class="modal-input" id="new-room-name" maxlength="100" />
 
-        <!-- Pending members (to be added) -->
-        @if (pendingMembers.length > 0) {
-          <div class="pending-members">
-            @for (p of pendingMembers; track p.userId) {
-              <div class="pending-chip">
-                <span>{{ p.fullName || p.username }}</span>
-                <button (click)="removePendingMember(p.userId)">✕</button>
-              </div>
-            }
-          </div>
-        }
-      </div>
+            <label class="field-label">Description</label>
+            <textarea [(ngModel)]="newRoomDesc" placeholder="What is this room about?"
+                class="modal-input modal-textarea" rows="2"></textarea>
 
-      <div class="modal-footer">
-        <button class="btn-cancel" (click)="closeCreateRoom()">Cancel</button>
-        <button class="btn-create" [disabled]="!newRoomName.trim() || isCreatingRoom"
-                (click)="submitCreateRoom()" id="submit-create-room">
-          @if (isCreatingRoom) { Creating… } @else { Create Room }
-        </button>
-      </div>
+            <label class="field-label">Add Members</label>
+            <div class="member-search-wrap">
+                <input type="text" [value]="memberSearch" (input)="onMemberSearchInput($any($event.target).value)"
+                    placeholder="Search by username…" class="modal-input" id="member-search-input" />
+                @if (memberSearching) { <div class="spinner-sm"></div> }
+            </div>
+
+            <!-- Search results -->
+            @if (memberResults.length > 0) {
+            <div class="member-search-results">
+                @for (u of memberResults; track u.userId) {
+                <div class="member-result-row" (click)="addPendingMember(u)">
+                    <div class="mr-avatar">
+                        @if (u.avatarUrl) { <img [src]="u.avatarUrl" class="avatar-img-sm" /> }
+                        @else { {{ getAvatarLetter(u) }} }
+                    </div>
+                    <div class="mr-info">
+                        <span>{{ u.fullName || u.username }}</span>
+                        <small>&#64;{{ u.username }}</small>
+                    </div>
+                    <span class="add-chip">+ Add</span>
+                </div>
+                }
+            </div>
+            }
+
+            <!-- Pending members (to be added) -->
+            @if (pendingMembers.length > 0) {
+            <div class="pending-members">
+                @for (p of pendingMembers; track p.userId) {
+                <div class="pending-chip">
+                    <span>{{ p.fullName || p.username }}</span>
+                    <button (click)="removePendingMember(p.userId)">✕</button>
+                </div>
+                }
+            </div>
+            }
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-cancel" (click)="closeCreateRoom()">Cancel</button>
+            <button class="btn-create" [disabled]="!newRoomName.trim() || isCreatingRoom" (click)="submitCreateRoom()"
+                id="submit-create-room">
+                @if (isCreatingRoom) { Creating… } @else { Create Room }
+            </button>
+        </div>
     </div>
-  </div>
+</div>
 }
 
 <!-- ════ Profile Panel ════════════════════════════════════════════ -->
 @if (showProfile) {
-  <div class="side-panel-overlay" (click)="closeProfile()">
+<div class="side-panel-overlay" (click)="closeProfile()">
     <div class="side-panel" (click)="$event.stopPropagation()">
-      <div class="sp-header">
-        <span class="sp-title">My Profile</span>
-        <button class="modal-close" (click)="closeProfile()">✕</button>
-      </div>
-      <div class="sp-body">
-
-        <!-- Avatar block -->
-        <div class="profile-hero">
-          <div class="profile-hero-av">
-            @if (avatarUrl) { <img [src]="avatarUrl" class="avatar-img"/> }
-            @else { {{ avatarLetter }} }
-          </div>
-          <div class="profile-hero-badge" [class]="'badge-' + currentStatus.toLowerCase()">
-            {{ currentStatus }}
-          </div>
+        <div class="sp-header">
+            <span class="sp-title">My Profile</span>
+            <button class="modal-close" (click)="closeProfile()">✕</button>
         </div>
+        <div class="sp-body">
 
-        <div class="profile-name">{{ fullName || username }}</div>
-        <div class="profile-handle">&#64;{{ username }}</div>
+            <!-- Avatar block -->
+            <div class="profile-hero">
+                <div class="profile-hero-av">
+                    @if (avatarUrl) { <img [src]="avatarUrl" class="avatar-img" /> }
+                    @else { {{ avatarLetter }} }
+                </div>
+                <div class="profile-hero-badge" [class]="'badge-' + currentStatus.toLowerCase()">
+                    {{ currentStatus }}
+                </div>
+            </div>
 
-        <!-- Details -->
-        <div class="profile-details">
-          @if (email) {
-            <div class="pd-row">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
-              <span>{{ email }}</span>
+            <div class="profile-name">{{ fullName || username }}</div>
+            <div class="profile-handle">&#64;{{ username }}</div>
+
+            <!-- Details -->
+            <div class="profile-details">
+                @if (email) {
+                <div class="pd-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                        <polyline points="22,6 12,12 2,6" />
+                    </svg>
+                    <span>{{ email }}</span>
+                </div>
+                }
+                @if (userLocation) {
+                <div class="pd-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    <span>{{ userLocation }}</span>
+                </div>
+                }
+                @if (userPhone) {
+                <div class="pd-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.4 2 2 0 0 1 3.58 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91A16 16 0 0 0 16 17.09l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 24 18.18v-.73" />
+                    </svg>
+                    <span>{{ userPhone }}</span>
+                </div>
+                }
             </div>
-          }
-          @if (userLocation) {
-            <div class="pd-row">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <span>{{ userLocation }}</span>
+
+            <!-- Quick presence from profile too -->
+            <div class="pd-section-title">Presence</div>
+            <div class="presence-pills">
+                @for (s of presenceOptions; track s.value) {
+                <button class="presence-pill" [class.active]="currentStatus === s.value" (click)="setStatus(s.value)">
+                    <span class="presence-dot" [class]="'pd-' + s.value.toLowerCase()"></span>
+                    {{ s.label }}
+                </button>
+                }
             </div>
-          }
-          @if (userPhone) {
-            <div class="pd-row">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.4 2 2 0 0 1 3.58 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91A16 16 0 0 0 16 17.09l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 24 18.18v-.73"/></svg>
-              <span>{{ userPhone }}</span>
-            </div>
-          }
+
         </div>
-
-        <!-- Quick presence from profile too -->
-        <div class="pd-section-title">Presence</div>
-        <div class="presence-pills">
-          @for (s of presenceOptions; track s.value) {
-            <button class="presence-pill" [class.active]="currentStatus === s.value"
-                    (click)="setStatus(s.value)">
-              <span class="presence-dot" [class]="'pd-' + s.value.toLowerCase()"></span>
-              {{ s.label }}
-            </button>
-          }
-        </div>
-
-      </div>
     </div>
-  </div>
+</div>
 }
 
 <!-- ════ Settings Panel ═══════════════════════════════════════════ -->
 @if (showSettings) {
-  <div class="side-panel-overlay" (click)="closeSettings()">
+<div class="side-panel-overlay" (click)="closeSettings()">
     <div class="side-panel settings-panel" (click)="$event.stopPropagation()">
-      <div class="sp-header">
-        <span class="sp-title">Settings</span>
-        <button class="modal-close" (click)="closeSettings()">✕</button>
-      </div>
-      <div class="sp-body">
-
-        <!-- ── Edit Profile ─────────────────────────────────────── -->
-        <div class="settings-section">
-          <div class="settings-section-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Edit Profile
-          </div>
-          <p class="settings-section-desc">Changes are saved directly to your account</p>
-
-          @if (profileSaveSuccess) {
-            <div class="report-success">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-              Profile updated successfully!
-            </div>
-          }
-
-          <div class="settings-form">
-            <label class="field-label">Full Name</label>
-            <input type="text" [(ngModel)]="editFullName" placeholder="Your full name"
-                   class="modal-input" id="edit-fullname-input"/>
-
-            <label class="field-label" style="margin-top:10px">Username</label>
-            <input type="text" [(ngModel)]="editUsername" placeholder="e.g. rudra_raj"
-                   class="modal-input" id="edit-username-input"/>
-
-            <label class="field-label" style="margin-top:10px">Bio</label>
-            <textarea [(ngModel)]="editBio" placeholder="Tell us about yourself…"
-                      class="modal-input modal-textarea" rows="3" id="edit-bio-input"></textarea>
-
-            <label class="field-label" style="margin-top:10px">Avatar URL</label>
-            <input type="text" [(ngModel)]="editAvatarUrl" placeholder="https://…"
-                   class="modal-input" id="edit-avatar-input"/>
-
-            <div class="edit-row">
-              <div class="edit-col">
-                <label class="field-label">Country</label>
-                <input type="text" [(ngModel)]="editCountry" placeholder="India"
-                       class="modal-input" id="edit-country-input"/>
-              </div>
-              <div class="edit-col">
-                <label class="field-label">City</label>
-                <input type="text" [(ngModel)]="editCity" placeholder="Kolkata"
-                       class="modal-input" id="edit-city-input"/>
-              </div>
-            </div>
-
-            <div class="edit-row">
-              <div class="edit-col" style="flex:0 0 90px">
-                <label class="field-label">Code</label>
-                <input type="text" [(ngModel)]="editCountryCode" placeholder="+91"
-                       class="modal-input" id="edit-cc-input"/>
-              </div>
-              <div class="edit-col">
-                <label class="field-label">Phone</label>
-                <input type="tel" [(ngModel)]="editPhone" placeholder="9876543210"
-                       class="modal-input" id="edit-phone-input"/>
-              </div>
-            </div>
-
-            <button class="btn-save-profile"
-                    [disabled]="isSavingProfile"
-                    (click)="saveProfile()" id="save-profile-btn">
-              @if (isSavingProfile) { Saving… } @else { Save Changes }
-            </button>
-          </div>
+        <div class="sp-header">
+            <span class="sp-title">Settings</span>
+            <button class="modal-close" (click)="closeSettings()">✕</button>
         </div>
+        <div class="sp-body">
 
-        <!-- ── Report a User ────────────────────────────────────── -->
-        <div class="settings-section">
-          <div class="settings-section-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Report a User
-          </div>
-          <p class="settings-section-desc">Report abusive or inappropriate behaviour</p>
+            <!-- ── Edit Profile ─────────────────────────────────────── -->
+            <div class="settings-section">
+                <div class="settings-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    Edit Profile
+                </div>
+                <p class="settings-section-desc">Changes are saved directly to your account</p>
 
-          @if (reportSuccess) {
-            <div class="report-success">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-              Report submitted. Our team will review it.
-            </div>
-          } @else {
-            <div class="settings-form">
-              <label class="field-label">Username to report</label>
-              <input type="text" [(ngModel)]="reportUsername" placeholder="&#64;username"
-                     class="modal-input" id="report-username-input"/>
-
-              <label class="field-label" style="margin-top:10px">Reason</label>
-              <div class="reason-chips">
-                @for (r of reportReasons; track r) {
-                  <button class="reason-chip" [class.selected]="reportReason === r"
-                          (click)="reportReason = r">{{ r }}</button>
+                @if (profileSaveSuccess) {
+                <div class="report-success">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Profile updated successfully!
+                </div>
                 }
-              </div>
-              <textarea [(ngModel)]="reportDetails" placeholder="Describe what happened (optional)…"
+
+                <div class="settings-form">
+                    <label class="field-label">Full Name</label>
+                    <input type="text" [(ngModel)]="editFullName" placeholder="Your full name" class="modal-input"
+                        id="edit-fullname-input" />
+
+                    <label class="field-label" style="margin-top:10px">Username</label>
+                    <input type="text" [(ngModel)]="editUsername" placeholder="e.g. rudra_raj" class="modal-input"
+                        id="edit-username-input" />
+
+                    <label class="field-label" style="margin-top:10px">Bio</label>
+                    <textarea [(ngModel)]="editBio" placeholder="Tell us about yourself…"
+                        class="modal-input modal-textarea" rows="3" id="edit-bio-input"></textarea>
+
+                    <label class="field-label" style="margin-top:10px">Avatar URL</label>
+                    <input type="text" [(ngModel)]="editAvatarUrl" placeholder="https://…" class="modal-input"
+                        id="edit-avatar-input" />
+
+                    <div class="edit-row">
+                        <div class="edit-col">
+                            <label class="field-label">Country</label>
+                            <input type="text" [(ngModel)]="editCountry" placeholder="India" class="modal-input"
+                                id="edit-country-input" />
+                        </div>
+                        <div class="edit-col">
+                            <label class="field-label">City</label>
+                            <input type="text" [(ngModel)]="editCity" placeholder="Kolkata" class="modal-input"
+                                id="edit-city-input" />
+                        </div>
+                    </div>
+
+                    <div class="edit-row">
+                        <div class="edit-col" style="flex:0 0 90px">
+                            <label class="field-label">Code</label>
+                            <input type="text" [(ngModel)]="editCountryCode" placeholder="+91" class="modal-input"
+                                id="edit-cc-input" />
+                        </div>
+                        <div class="edit-col">
+                            <label class="field-label">Phone</label>
+                            <input type="tel" [(ngModel)]="editPhone" placeholder="9876543210" class="modal-input"
+                                id="edit-phone-input" />
+                        </div>
+                    </div>
+
+                    <button class="btn-save-profile" [disabled]="isSavingProfile" (click)="saveProfile()"
+                        id="save-profile-btn">
+                        @if (isSavingProfile) { Saving… } @else { Save Changes }
+                    </button>
+
+                    <!-- ── Custom Status (PREMIUM) ─────────────────────────────────── -->
+                    <div class="settings-section">
+                        <div class="section-label">
+                            <span>Custom Status</span>
+                            @if (!isPremium) { <span class="premium-tag">✨ Premium</span> }
+                        </div>
+                        <div class="custom-status-row">
+                            <input type="text" [(ngModel)]="customStatusText"
+                                placeholder="@if (isPremium) { In a meeting 🎯 } @else { Upgrade to Premium }"
+                                [placeholder]="isPremium ? 'In a meeting 🎯' : 'Upgrade to Premium to set a custom status'"
+                                maxlength="100" [disabled]="!isPremium" class="modal-input custom-status-input"
+                                id="custom-status-input" (blur)="saveCustomStatus()" />
+                            @if (isPremium) {
+                            <button class="btn-save-status" (click)="saveCustomStatus()" title="Save status"
+                                id="save-status-btn">✓</button>
+                            }
+                        </div>
+                        @if (!isPremium) {
+                        <p class="premium-hint">✨ Custom status is a Premium feature. Upgrade your plan to personalize
+                            your presence.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Report a User ────────────────────────────────────── -->
+            <div class="settings-section">
+                <div class="settings-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path
+                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                    Report a User
+                </div>
+                <p class="settings-section-desc">Report abusive or inappropriate behaviour</p>
+
+                @if (reportSuccess) {
+                <div class="report-success">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Report submitted. Our team will review it.
+                </div>
+                } @else {
+                <div class="settings-form">
+                    <label class="field-label">Username to report</label>
+                    <input type="text" [(ngModel)]="reportUsername" placeholder="&#64;username" class="modal-input"
+                        id="report-username-input" />
+
+                    <label class="field-label" style="margin-top:10px">Reason</label>
+                    <div class="reason-chips">
+                        @for (r of reportReasons; track r) {
+                        <button class="reason-chip" [class.selected]="reportReason === r" (click)="reportReason = r">{{
+                            r }}</button>
+                        }
+                    </div>
+                    <textarea [(ngModel)]="reportDetails" placeholder="Describe what happened (optional)…"
                         class="modal-input modal-textarea" rows="3" style="margin-top:10px"></textarea>
 
-              <button class="btn-report" [disabled]="!reportUsername.trim() || !reportReason || isReporting"
-                      (click)="submitReport()" id="submit-report-btn">
-                @if (isReporting) { Submitting… } @else { Submit Report }
-              </button>
+                    <button class="btn-report" [disabled]="!reportUsername.trim() || !reportReason || isReporting"
+                        (click)="submitReport()" id="submit-report-btn">
+                        @if (isReporting) { Submitting… } @else { Submit Report }
+                    </button>
+
+                    @if (reportError) {
+                    <div id="report-error-msg" style="display:flex;align-items:center;gap:10px;padding:14px 16px;margin-top:10px;border-radius:12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:13px;font-weight:500">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;flex-shrink:0">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                        </svg>
+                        {{ reportError }}
+                    </div>
+                    }
+                </div>
+                }
             </div>
-          }
-        </div>
 
-        <!-- ── Account ──────────────────────────────────────────── -->
-        <div class="settings-section">
-          <div class="settings-section-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Account
-          </div>
-          <button class="btn-logout-settings" (click)="logout()" id="settings-logout-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Sign Out
-          </button>
-        </div>
+            <!-- ── Account ──────────────────────────────────────────── -->
+            <div class="settings-section">
+                <div class="settings-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                    Account
+                </div>
+                <button class="btn-logout-settings" (click)="logout()" id="settings-logout-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    Sign Out
+                </button>
+            </div>
 
-      </div>
+        </div>
     </div>
-  </div>
+</div>
 }
 
 <!-- ════ Image Lightbox ═══════════════════════════════════════════ -->
 @if (lightboxUrl) {
-  <div class="lightbox-overlay" (click)="closeLightbox()" id="lightbox-overlay">
+<div class="lightbox-overlay" (click)="closeLightbox()" id="lightbox-overlay">
     <button class="lightbox-close" (click)="closeLightbox()" title="Close (Esc)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
     </button>
     <div class="lightbox-content" (click)="$event.stopPropagation()">
-      <img [src]="lightboxUrl" class="lightbox-img" alt="Full size image"/>
+        <!--
+          Bug 2 fix: render <video> for videos, <img> for everything else.
+          autoplay + muted: starts playing immediately when opened (like WhatsApp).
+          controls: native browser controls for seeking, volume, fullscreen.
+        -->
+        @if (lightboxMediaType === 'VIDEO') {
+        <video [src]="lightboxUrl" class="lightbox-video" controls autoplay muted playsinline>
+            Your browser does not support the video tag.
+        </video>
+        } @else {
+        <img [src]="lightboxUrl" class="lightbox-img" alt="Full size image" />
+        }
     </div>
-  </div>
+</div>
+}
+
+<!-- Mobile Bottom Navigation (hidden on desktop) -->
+<nav class="mobile-bottom-nav">
+    <button class="mob-nav-tab" [class.active]="activeTab==='chat' && !mobileShowChat"
+        (click)="activeTab='chat'; mobileShowChat=false">
+        <div class="mob-nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            @if (totalUnread > 0) { <span class="mob-badge">{{ totalUnread > 9 ? '9+' : totalUnread }}</span> }
+        </div>
+        <span class="mob-nav-label">Chat</span>
+    </button>
+    <button class="mob-nav-tab" [class.active]="activeTab==='people'"
+        (click)="activeTab='people'; mobileShowChat=false">
+        <div class="mob-nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+        </div>
+        <span class="mob-nav-label">People</span>
+    </button>
+    <button class="mob-nav-tab" [class.active]="showNotifications" (click)="openNotifications()">
+        <div class="mob-nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            @if (unreadNotifCount > 0) { <span class="mob-badge">{{ unreadNotifCount > 9 ? '9+' : unreadNotifCount
+                }}</span> }
+        </div>
+        <span class="mob-nav-label">Alerts</span>
+    </button>
+    <button class="mob-nav-tab" [class.active]="showSettings" (click)="openSettings()">
+        <div class="mob-nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3" />
+                <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+        </div>
+        <span class="mob-nav-label">Settings</span>
+    </button>
+</nav>
+
+<!-- --- Mobile Media Bottom Sheet   outside all transforms --- -->
+@if (mobileShowMedia) {
+<div class="mob-media-sheet-overlay" (click)="mobileShowMedia=false"></div>
+<div class="mob-media-sheet">
+    <div class="mob-media-sheet-handle"></div>
+    <div class="mob-media-sheet-header">
+        <span class="mob-media-sheet-title">Shared Media</span>
+        <button class="mob-media-sheet-close" (click)="mobileShowMedia=false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+        </button>
+    </div>
+    @if (isMediaLoading) {
+    <div class="mob-media-loading">
+        <div class="spinner"></div><span style="margin-left:10px;color:rgba(255,255,255,0.5);font-size:13px">Loading
+            media </span>
+    </div>
+    }
+    @if (!isMediaLoading && roomMedia.length === 0) {
+    <div class="mob-media-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            style="width:40px;height:40px;margin-bottom:10px;opacity:0.4">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+        </svg>
+        <p>No media shared yet</p>
+    </div>
+    }
+    <div class="mob-media-grid">
+        @for (m of roomMedia; track m.mediaId) {
+        <div class="mob-media-item" (click)="mobileShowMedia=false; openLightbox(m.url)">
+            @if (m.mimeType.startsWith('image/')) {
+            <img [src]="resolveMediaUrl(m.url)" class="mob-media-thumb" alt="media" />
+            } @else {
+            <div class="mob-media-video-thumb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+            </div>
+            }
+        </div>
+        }
+    </div>
+</div>
+}
+
+<!-- ─── Notification Detail Modal ──────────────────────────────────────────── -->
+@if (selectedNotif) {
+<div class="notif-modal-overlay" (click)="closeNotifDetail()" id="notif-modal-overlay">
+    <div class="notif-modal" (click)="$event.stopPropagation()" id="notif-detail-modal" role="dialog" aria-modal="true"
+        aria-labelledby="notif-modal-heading">
+
+        <!-- Header -->
+        <div class="notif-modal-header">
+            <div class="notif-modal-type-icon">
+                @switch (selectedNotif.type) {
+                @case ('NEW_MESSAGE') { 💬 }
+                @case ('MENTION') { 🔖 }
+                @case ('ROOM_INVITE') { 🏠 }
+                @case ('SYSTEM') { 📢 }
+                @default { 🔔 }
+                }
+            </div>
+            <span class="notif-modal-type-label">{{ selectedNotif.type | titlecase }}</span>
+            <button class="notif-modal-close" (click)="closeNotifDetail()" title="Close">✕</button>
+        </div>
+
+        <!-- Body -->
+        <div class="notif-modal-body">
+            <h2 class="notif-modal-title" id="notif-modal-heading">{{ selectedNotif.title }}</h2>
+            @if (selectedNotif.message) {
+            <p class="notif-modal-message">{{ selectedNotif.message }}</p>
+            }
+            <div class="notif-modal-time">{{ selectedNotif.createdAt | date:'MMMM d, yyyy · h:mm a' }}</div>
+        </div>
+
+        <!-- Actions -->
+        <div class="notif-modal-actions">
+            @if (selectedNotif.roomId) {
+            <button class="notif-modal-goto" (click)="notifGoToChat()" id="notif-goto-chat-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    style="width:15px;height:15px;vertical-align:middle;margin-right:5px">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                Go to Chat
+            </button>
+            }
+            <button class="notif-modal-dismiss" (click)="closeNotifDetail()">Dismiss</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- ══ Premium Celebration Modal ════════════════════════════════════════════ -->
+@if (showPremiumModal) {
+<!-- Confetti is rendered on a programmatic transparent canvas (see launchConfetti() in TS) -->
+<div class="premium-modal-overlay" (click)="closePremiumModal()" id="premium-modal-overlay">
+    <div class="premium-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <button class="premium-modal-close" (click)="closePremiumModal()" aria-label="Close">✕</button>
+        <div class="pm-glow-ring"></div>
+        <div class="pm-icon">✨</div>
+        <h2 class="pm-title">You are a Premium User</h2>
+        <p class="pm-subtitle">Enjoy unlimited rooms, pinned messages, and all exclusive ConnectHub features.</p>
+        <button class="pm-congrats-btn" (click)="launchConfetti()" id="pm-congrats-btn">
+             Congrats! 🍾
+        </button>
+    </div>
+</div>
+}
+
+<!-- ══ Premium Upgrade Modal ══════════════════════════════════════════════ -->
+@if (showUpgradeModal) {
+<div class="upgrade-overlay" (click)="closeUpgradeModal()" id="upgrade-modal-overlay">
+    <div class="upgrade-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true"
+        aria-labelledby="upgrade-modal-title">
+
+        <!-- Header -->
+        <button class="upgrade-close" (click)="closeUpgradeModal()" aria-label="Close">✕</button>
+        <div class="upgrade-header">
+            <div class="upgrade-crown">👑</div>
+            <h2 class="upgrade-title" id="upgrade-modal-title">Unlock ConnectHub Premium</h2>
+            <p class="upgrade-subtitle">Everything you need for a richer, more powerful chat experience</p>
+        </div>
+
+        <!-- Plan Cards -->
+        <div class="plan-cards">
+
+            <!-- FREE card -->
+            <div class="plan-card plan-card-free">
+                <div class="plan-card-header">
+                    <span class="plan-card-name">Free</span>
+                    <div class="plan-card-price">
+                        <span class="plan-price-amount">₹0</span>
+                        <span class="plan-price-period">/ forever</span>
+                    </div>
+                </div>
+                <ul class="plan-features">
+                    <li class="feat-yes">✓ Direct messages (unlimited)</li>
+                    <li class="feat-yes">✓ Join existing group rooms</li>
+                    <li class="feat-yes">✓ Message history — last 30 days</li>
+                    <li class="feat-yes">✓ File & media sharing</li>
+                    <li class="feat-no">✗ Create group rooms</li>
+                    <li class="feat-no">✗ Custom status text</li>
+                    <li class="feat-no">✗ Premium badge on avatar</li>
+                    <li class="feat-no">✗ Unlimited message history</li>
+                    <li class="feat-no">✗ Pin messages in rooms</li>
+                </ul>
+                <div class="plan-card-current">Your current plan</div>
+            </div>
+
+            <!-- PREMIUM card -->
+            <div class="plan-card plan-card-premium">
+                <div class="plan-popular-tag">✨ Most Popular</div>
+                <div class="plan-card-header">
+                    <span class="plan-card-name">Premium</span>
+                    <div class="plan-card-price">
+                        <span class="plan-price-amount">₹499</span>
+                        <span class="plan-price-period">/ month</span>
+                    </div>
+                </div>
+                <ul class="plan-features">
+                    <li class="feat-yes">✓ Direct messages (unlimited)</li>
+                    <li class="feat-yes">✓ Join existing group rooms</li>
+                    <li class="feat-yes">✓ <strong>Unlimited</strong> message history</li>
+                    <li class="feat-yes">✓ File & media sharing</li>
+                    <li class="feat-yes">✓ <strong>Create group rooms</strong></li>
+                    <li class="feat-yes">✓ <strong>Custom status text</strong></li>
+                    <li class="feat-yes">✓ <strong>Premium 👑 badge</strong> on avatar</li>
+                    <li class="feat-yes">✓ <strong>Pin messages</strong> in rooms</li>
+                    <li class="feat-yes">✓ Priority support</li>
+                </ul>
+                <button class="btn-upgrade-cta" (click)="initiatePayment()" [disabled]="isPaymentLoading"
+                    id="upgrade-cta-btn">
+                    @if (isPaymentLoading) { ⏳ Creating order… } @else { Upgrade to Premium → }
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Footer note -->
+        <p class="upgrade-footer-note">Secure checkout powered by Razorpay · Cancel anytime</p>
+    </div>
+</div>
 }

@@ -3,8 +3,14 @@ import { Routes } from '@angular/router';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'login',
+    redirectTo: 'home',
     pathMatch: 'full'
+  },
+  {
+    path: 'home',
+    loadComponent: () =>
+      import('./home/home.component').then(m => m.HomeComponent),
+    title: 'ConnectHub — Real-Time Chat Platform'
   },
   {
     path: 'login',
@@ -17,6 +23,13 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./auth/register/register.component').then(m => m.RegisterComponent),
     title: 'Create Account — ConnectHub'
+  },
+  {
+    path: 'verify-email-sent',
+    loadComponent: () =>
+      import('./auth/verify-email-sent/verify-email-sent.component')
+        .then(m => m.VerifyEmailSentComponent),
+    title: 'Verify Your Email — ConnectHub'
   },
   {
     path: 'dashboard',

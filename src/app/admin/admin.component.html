@@ -6,26 +6,30 @@
       <span class="admin-tag">Admin</span>
     </div>
     <div class="nav-items">
-      <button [class.active]="activeSection==='overview'"  (click)="activeSection='overview'"  class="nav-item">
+      <button [class.active]="activeSection==='overview'"  (click)="activeSection='overview'"  class="nav-item" id="nav-overview">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Overview
       </button>
-      <button [class.active]="activeSection==='users'"     (click)="activeSection='users'"     class="nav-item">
+      <button [class.active]="activeSection==='users'"     (click)="activeSection='users'"     class="nav-item" id="nav-users">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users
         <span class="count-badge">{{ totalUsers }}</span>
       </button>
-      <button [class.active]="activeSection==='rooms'"     (click)="activeSection='rooms'"     class="nav-item">
+      <button [class.active]="activeSection==='rooms'"     (click)="activeSection='rooms'"     class="nav-item" id="nav-rooms">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Rooms
         <span class="count-badge">{{ totalRooms }}</span>
       </button>
-      <button [class.active]="activeSection==='broadcast'" (click)="activeSection='broadcast'" class="nav-item">
+      <button [class.active]="activeSection==='broadcast'" (click)="activeSection='broadcast'" class="nav-item" id="nav-broadcast">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.35 2 2 0 0 1 3.62 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.1a16 16 0 0 0 6 6l.86-.86a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 15.5"/></svg>Broadcast
       </button>
-      <button [class.active]="activeSection==='logs'"      (click)="activeSection='logs'"      class="nav-item">
+      <button [class.active]="activeSection==='reports'"   (click)="activeSection='reports'"   class="nav-item" id="nav-reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Reports
+        <span class="count-badge" *ngIf="pendingReports > 0" style="background:#ef4444">{{ pendingReports }}</span>
+      </button>
+      <button [class.active]="activeSection==='logs'"      (click)="activeSection='logs'"      class="nav-item" id="nav-logs">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Audit Logs
         <span class="count-badge">{{ logs.length }}</span>
       </button>
     </div>
-    <button class="back-btn" (click)="goBack()">
+    <button class="back-btn" (click)="goBack()" id="admin-back-btn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
       Back to Chat
     </button>
@@ -40,68 +44,107 @@
       <div class="analytics-grid">
         <div class="ana-card purple">
           <div class="ana-icon">👥</div>
-          <div class="ana-num">{{ totalUsers }}</div>
+          <div class="ana-num">{{ isLoadingUsers ? '…' : totalUsers }}</div>
           <div class="ana-label">Total Users</div>
         </div>
         <div class="ana-card green">
           <div class="ana-icon">🟢</div>
-          <div class="ana-num">{{ activeUsers }}</div>
+          <div class="ana-num">{{ isLoadingUsers ? '…' : activeUsers }}</div>
           <div class="ana-label">Active Users</div>
         </div>
         <div class="ana-card red">
           <div class="ana-icon">🚫</div>
-          <div class="ana-num">{{ suspendedUsers }}</div>
+          <div class="ana-num">{{ isLoadingUsers ? '…' : suspendedUsers }}</div>
           <div class="ana-label">Suspended</div>
         </div>
         <div class="ana-card blue">
           <div class="ana-icon">🏠</div>
-          <div class="ana-num">{{ totalRooms }}</div>
-          <div class="ana-label">Active Rooms</div>
+          <div class="ana-num">{{ isLoadingRooms ? '…' : totalRooms }}</div>
+          <div class="ana-label">Total Rooms</div>
         </div>
         <div class="ana-card amber">
           <div class="ana-icon">💬</div>
-          <div class="ana-num">{{ totalMessages.toLocaleString() }}</div>
-          <div class="ana-label">Total Messages</div>
+          <div class="ana-num">{{ isLoadingRooms ? '…' : groupRooms }}</div>
+          <div class="ana-label">Group Rooms</div>
         </div>
         <div class="ana-card teal">
-          <div class="ana-icon">📁</div>
-          <div class="ana-num">2.4 GB</div>
-          <div class="ana-label">Storage Used</div>
+          <div class="ana-icon">📋</div>
+          <div class="ana-num">{{ logs.length }}</div>
+          <div class="ana-label">Admin Actions</div>
+        </div>
+        <div class="ana-card red" style="cursor:pointer" (click)="activeSection='reports'" id="overview-reports-card">
+          <div class="ana-icon">🚨</div>
+          <div class="ana-num">{{ isLoadingReports ? '…' : pendingReports }}</div>
+          <div class="ana-label">Pending Reports</div>
         </div>
       </div>
       <div class="ws-card">
         <div class="ws-dot"></div>
         <div>
-          <div class="ws-title">WebSocket Connections</div>
-          <div class="ws-sub">Real-time count — available after WebSocket integration</div>
+          <div class="ws-title">Platform Status</div>
+          <div class="ws-sub">All microservices — auth · room · notification · message</div>
         </div>
-        <div class="ws-num">—</div>
+        <div class="ws-num">Live</div>
       </div>
     </div>
 
     <!-- Users -->
     <div class="section" *ngIf="activeSection==='users'">
-      <h2 class="section-title">User Accounts</h2>
-      <div class="table-wrap">
+      <div class="section-header-row">
+        <h2 class="section-title">User Accounts</h2>
+        <button class="refresh-btn" (click)="loadUsers()" [disabled]="isLoadingUsers" id="refresh-users-btn">
+          {{ isLoadingUsers ? 'Loading…' : '↻ Refresh' }}
+        </button>
+      </div>
+
+      <div *ngIf="errorUsers" class="error-banner">⚠️ {{ errorUsers }}</div>
+
+      <div *ngIf="isLoadingUsers" class="loading-row">
+        <div class="spinner"></div> Loading users…
+      </div>
+
+      <div class="table-wrap" *ngIf="!isLoadingUsers">
         <table class="data-table">
           <thead>
-            <tr><th>User</th><th>Email</th><th>Role</th><th>Joined</th><th>Status</th><th>Actions</th></tr>
+            <tr><th>User</th><th>Email</th><th>Status</th><th>Joined</th><th>Last Seen</th><th>Actions</th></tr>
           </thead>
           <tbody>
-            <tr *ngFor="let u of users" [class.suspended-row]="u.status==='suspended'">
-              <td><div class="table-avatar">{{ u.name.charAt(0) }}<span>{{ u.name }}</span></div></td>
-              <td class="muted">{{ u.email }}</td>
-              <td><span class="role-chip" [class.admin-chip]="u.role==='Admin'">{{ u.role }}</span></td>
-              <td class="muted">{{ u.joined }}</td>
-              <td><span class="status-pill" [class.active-pill]="u.status==='active'" [class.susp-pill]="u.status==='suspended'">{{ u.status }}</span></td>
+            <tr *ngFor="let u of users" [class.suspended-row]="!u.isActive" [id]="'user-row-' + u.userId">
               <td>
-                <div class="action-btns">
-                  <button class="act-btn toggle-btn" (click)="toggleUserStatus(u)" [title]="u.status==='active'?'Suspend':'Reactivate'">
-                    {{ u.status==='active' ? 'Suspend' : 'Reactivate' }}
-                  </button>
-                  <button class="act-btn del-btn" (click)="deleteUser(u)" *ngIf="u.email!=='rudrar2002@gmail.com'">Delete</button>
+                <div class="table-avatar">
+                  {{ avatarLetter(u) }}
+                  <span>{{ u.fullName || u.username }}</span>
+                  <span class="username-hint">@{{ u.username }}</span>
                 </div>
               </td>
+              <td class="muted">{{ u.email }}</td>
+              <td>
+                <span class="status-pill"
+                      [class.active-pill]="u.isActive"
+                      [class.susp-pill]="!u.isActive">
+                  {{ u.isActive ? 'Active' : 'Suspended' }}
+                </span>
+              </td>
+              <td class="muted">{{ formatDate(u.createdAt) }}</td>
+              <td class="muted">{{ formatDate(u.lastSeenAt) }}</td>
+              <td>
+                <div class="action-btns">
+                  <button class="act-btn toggle-btn"
+                          (click)="toggleUserStatus(u)"
+                          [disabled]="u.role === 'PLATFORM_ADMIN'"
+                          [id]="'toggle-user-' + u.userId"
+                          [title]="u.isActive ? 'Suspend user' : 'Reactivate user'">
+                    {{ u.isActive ? 'Suspend' : 'Reactivate' }}
+                  </button>
+                  <button class="act-btn del-btn"
+                          (click)="deleteUser(u)"
+                          [id]="'delete-user-' + u.userId"
+                          *ngIf="u.role !== 'PLATFORM_ADMIN'">Delete</button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="users.length === 0">
+              <td colspan="6" class="empty-row">No users found.</td>
             </tr>
           </tbody>
         </table>
@@ -110,19 +153,43 @@
 
     <!-- Rooms -->
     <div class="section" *ngIf="activeSection==='rooms'">
-      <h2 class="section-title">All Rooms</h2>
-      <div class="table-wrap">
+      <div class="section-header-row">
+        <h2 class="section-title">All Rooms</h2>
+        <button class="refresh-btn" (click)="loadRooms()" [disabled]="isLoadingRooms" id="refresh-rooms-btn">
+          {{ isLoadingRooms ? 'Loading…' : '↻ Refresh' }}
+        </button>
+      </div>
+
+      <div *ngIf="errorRooms" class="error-banner">⚠️ {{ errorRooms }}</div>
+
+      <div *ngIf="isLoadingRooms" class="loading-row">
+        <div class="spinner"></div> Loading rooms…
+      </div>
+
+      <div class="table-wrap" *ngIf="!isLoadingRooms">
         <table class="data-table">
           <thead>
-            <tr><th>Room</th><th>Members</th><th>Messages</th><th>Created</th><th>Actions</th></tr>
+            <tr><th>Room</th><th>Type</th><th>Members</th><th>Created</th><th>Actions</th></tr>
           </thead>
           <tbody>
-            <tr *ngFor="let r of rooms">
-              <td><strong class="room-name">{{ r.name }}</strong></td>
-              <td class="muted">{{ r.members }}</td>
-              <td class="muted">{{ r.messages.toLocaleString() }}</td>
-              <td class="muted">{{ r.created }}</td>
-              <td><button class="act-btn del-btn" (click)="deleteRoom(r)">Delete</button></td>
+            <tr *ngFor="let r of rooms" [id]="'room-row-' + r.roomId">
+              <td>
+                <div class="room-name-cell">
+                  <strong class="room-name">{{ r.name }}</strong>
+                  <span class="room-desc" *ngIf="r.description">{{ r.description }}</span>
+                </div>
+              </td>
+              <td><span class="role-chip" [class.admin-chip]="r.type==='GROUP'">{{ r.type }}</span></td>
+              <td class="muted">{{ r.memberCount }}</td>
+              <td class="muted">{{ formatDate(r.createdAt) }}</td>
+              <td>
+                <button class="act-btn del-btn"
+                        (click)="deleteRoom(r)"
+                        [id]="'delete-room-' + r.roomId">Delete</button>
+              </td>
+            </tr>
+            <tr *ngIf="rooms.length === 0">
+              <td colspan="5" class="empty-row">No rooms found.</td>
             </tr>
           </tbody>
         </table>
@@ -133,23 +200,131 @@
     <div class="section" *ngIf="activeSection==='broadcast'">
       <h2 class="section-title">Platform Broadcast</h2>
       <div class="broadcast-card">
-        <p class="bc-desc">Send a message to all connected users on the platform. WebSocket delivery will be activated after STOMP integration.</p>
-        <textarea [(ngModel)]="broadcastMsg" placeholder="Type your broadcast message…" rows="5" id="broadcast-input" class="bc-input"></textarea>
+        <p class="bc-desc">
+          Send a real-time SYSTEM notification to all <strong>{{ totalUsers }}</strong> users on the platform.
+          Each user will see it in their notification bell instantly.
+        </p>
+        <input type="text"
+               [(ngModel)]="broadcastTitle"
+               placeholder="Notification title (e.g. Scheduled Maintenance)"
+               id="broadcast-title-input"
+               class="bc-title-input" />
+        <textarea [(ngModel)]="broadcastMsg"
+                  placeholder="Broadcast message body…"
+                  rows="5"
+                  id="broadcast-input"
+                  class="bc-input"></textarea>
         <div class="bc-footer">
           <span class="bc-hint">{{ broadcastMsg.length }} / 500 characters</span>
-          <button class="bc-send-btn" (click)="sendBroadcast()" [disabled]="!broadcastMsg.trim()">
+          <button class="bc-send-btn"
+                  id="broadcast-send-btn"
+                  (click)="sendBroadcast()"
+                  [disabled]="!broadcastMsg.trim() || !broadcastTitle.trim() || isSendingBroadcast">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            Send Broadcast
+            {{ isSendingBroadcast ? 'Sending…' : 'Send Broadcast' }}
           </button>
         </div>
-        <div class="bc-success" *ngIf="broadcastSent">✅ Broadcast queued successfully!</div>
+        <div class="bc-success" *ngIf="broadcastSent">✅ Broadcast sent to {{ totalUsers }} users!</div>
+        <div class="bc-error"   *ngIf="broadcastError">❌ {{ broadcastError }}</div>
+      </div>
+    </div>
+
+    <!-- Reports -->
+    <div class="section" *ngIf="activeSection==='reports'">
+      <div class="section-header-row">
+        <h2 class="section-title">
+          User Reports
+          <span *ngIf="pendingReports > 0" class="pending-badge">{{ pendingReports }} pending</span>
+        </h2>
+        <button class="refresh-btn" (click)="loadReports()" [disabled]="isLoadingReports" id="refresh-reports-btn">
+          {{ isLoadingReports ? 'Loading…' : '↻ Refresh' }}
+        </button>
+      </div>
+
+      <div *ngIf="errorReports" class="error-banner">⚠️ {{ errorReports }}</div>
+
+      <div *ngIf="isLoadingReports" class="loading-row">
+        <div class="spinner"></div> Loading reports…
+      </div>
+
+      <div *ngIf="!isLoadingReports && reports.length === 0" class="empty-row" style="padding:2rem;text-align:center">
+        No reports submitted yet.
+      </div>
+
+      <div class="reports-grid" *ngIf="!isLoadingReports && reports.length > 0">
+        <div class="report-card" *ngFor="let r of reports"
+             [class.report-resolved]="r.status === 'RESOLVED'"
+             [class.report-dismissed]="r.status === 'DISMISSED'"
+             [id]="'report-card-' + r.reportId">
+
+          <!-- Header: status + date -->
+          <div class="report-card-header">
+            <span class="report-status-badge"
+                  [class.badge-pending]="r.status === 'PENDING'"
+                  [class.badge-resolved]="r.status === 'RESOLVED'"
+                  [class.badge-dismissed]="r.status === 'DISMISSED'">
+              {{ r.status }}
+            </span>
+            <span class="report-date muted">{{ formatDate(r.createdAt) }}</span>
+          </div>
+
+          <!-- Reason -->
+          <div class="report-reason">{{ r.reason }}</div>
+
+          <!-- Parties -->
+          <div class="report-parties">
+            <div class="report-party">
+              <span class="party-label">Reported User</span>
+              <span class="party-name reported-name">@{{ r.reportedUsername }}</span>
+            </div>
+            <svg class="party-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            <div class="report-party">
+              <span class="party-label">Reported By</span>
+              <span class="party-name">@{{ r.reporterUsername }}</span>
+            </div>
+          </div>
+
+          <!-- Details -->
+          <div class="report-details" *ngIf="r.details">
+            <span class="details-label">Details:</span> {{ r.details }}
+          </div>
+
+          <!-- Actions (only for PENDING) -->
+          <div class="report-actions" *ngIf="r.status === 'PENDING'">
+            <button class="act-btn suspend-btn"
+                    (click)="suspendFromReport(r)"
+                    [id]="'suspend-from-report-' + r.reportId"
+                    title="Suspend the reported user and resolve this report">
+              🚫 Suspend User
+            </button>
+            <button class="act-btn del-btn"
+                    (click)="deleteFromReport(r)"
+                    [id]="'delete-from-report-' + r.reportId"
+                    title="Permanently delete the reported user">
+              🗑 Delete User
+            </button>
+            <button class="act-btn resolve-btn"
+                    (click)="resolveReport(r)"
+                    [id]="'resolve-report-' + r.reportId"
+                    title="Mark as resolved without action">
+              ✓ Resolve
+            </button>
+            <button class="act-btn dismiss-btn"
+                    (click)="dismissReport(r)"
+                    [id]="'dismiss-report-' + r.reportId"
+                    title="Dismiss this report">
+              Dismiss
+            </button>
+          </div>
+
+        </div>
       </div>
     </div>
 
     <!-- Audit Logs -->
     <div class="section" *ngIf="activeSection==='logs'">
-      <h2 class="section-title">Audit Logs</h2>
-      <div class="logs-list">
+      <h2 class="section-title">Audit Logs <span class="muted" style="font-size:0.85rem">(session only)</span></h2>
+      <div class="logs-list" *ngIf="logs.length > 0; else noLogs">
         <div class="log-item" *ngFor="let l of logs">
           <div class="log-icon">🛡️</div>
           <div class="log-info">
@@ -162,6 +337,11 @@
           </div>
         </div>
       </div>
+      <ng-template #noLogs>
+        <div class="empty-row" style="padding:2rem;text-align:center;color:var(--muted)">
+          No admin actions yet this session.
+        </div>
+      </ng-template>
     </div>
 
   </div>

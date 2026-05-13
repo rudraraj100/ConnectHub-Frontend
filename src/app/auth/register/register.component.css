@@ -556,6 +556,17 @@
   color: #4ade80;
 }
 
+/* Verification OTP hint below email field */
+.verify-email-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: #a78bfa;
+  animation: errIn 0.18s ease;
+}
+
 @keyframes errIn {
   from {
     opacity: 0;

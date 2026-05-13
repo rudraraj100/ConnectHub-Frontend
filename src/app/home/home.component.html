@@ -1,0 +1,233 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     CONNECTHUB HOMEPAGE
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- ── NAVBAR ───────────────────────────────────────────────────── -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <!-- Logo -->
+    <a class="nav-logo" (click)="goToLogin()">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="15" stroke="white" stroke-width="1.5"/>
+          <path d="M8 12h16M8 16h10M8 20h13" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span>ConnectHub</span>
+    </a>
+
+    <!-- Nav Links -->
+    <ul class="nav-links">
+      <li><a class="nav-link active" href="#hero">Home</a></li>
+      <li><a class="nav-link" href="#features">Features</a></li>
+      <li><a class="nav-link" href="#stats">Stats</a></li>
+      <li><a class="nav-link" href="#footer">About</a></li>
+    </ul>
+
+    <!-- Actions -->
+    <div class="nav-actions">
+      <button class="btn-ghost" id="nav-signin-btn" (click)="goToLogin()">Sign In</button>
+      <button class="btn-primary" id="nav-started-btn" (click)="goToRegister()">Get Started</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────────────────── -->
+<section class="hero" id="hero">
+  <div class="hero-left">
+    <!-- Badge -->
+    <div class="hero-badge">
+      <span class="badge-dot">💬</span>
+      The #1 Real-Time Chat Platform
+    </div>
+
+    <!-- Headline -->
+    <h1 class="hero-heading">
+      Connect with Anyone,<br>
+      <span class="gradient-text">Anywhere,</span><br>
+      Instantly
+    </h1>
+
+    <!-- Subtext -->
+    <p class="hero-sub">
+      Send messages, join rooms, share media and collaborate in real-time.
+      Built for speed, designed for humans. Zero lag, total privacy.
+    </p>
+
+    <!-- CTAs -->
+    <div class="hero-ctas">
+      <button class="btn-primary large" id="hero-started-btn" (click)="goToRegister()">
+        Get Started Free
+      </button>
+      <button class="btn-outline large" id="hero-features-btn" (click)="scrollToFeatures()">
+        Explore Features
+      </button>
+    </div>
+  </div>
+
+  <!-- Floating cards -->
+  <div class="hero-right">
+    <div class="orbit-ring"></div>
+    <div class="orbit-ring ring2"></div>
+
+    <div class="float-card card1">
+      <div class="card-icon">⚡</div>
+      <div class="card-text">
+        <span class="card-title">Real-Time Messaging</span>
+        <span class="card-sub">Under 100ms delivery</span>
+      </div>
+    </div>
+
+    <div class="float-card card2">
+      <div class="card-icon">🔐</div>
+      <div class="card-text">
+        <span class="card-title">End-to-End Secure</span>
+        <span class="card-sub">JWT + Redis protected</span>
+      </div>
+    </div>
+
+    <div class="float-card card3">
+      <div class="card-icon">🌍</div>
+      <div class="card-text">
+        <span class="card-title">50K+ Users</span>
+        <span class="card-sub">Global community</span>
+      </div>
+    </div>
+
+    <div class="float-card card4">
+      <div class="card-icon">📌</div>
+      <div class="card-text">
+        <span class="card-title">Pin Messages</span>
+        <span class="card-sub">Premium feature</span>
+      </div>
+    </div>
+
+    <!-- Center glow node -->
+    <div class="center-node">
+      <svg width="36" height="36" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="15" stroke="white" stroke-width="1"/>
+        <path d="M8 12h16M8 16h10M8 20h13" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ── STATS BAR ─────────────────────────────────────────────────── -->
+<section class="stats-bar" id="stats">
+  <div class="stat-item">
+    <span class="stat-num">50K+</span>
+    <span class="stat-label">Active Users</span>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <span class="stat-num">&lt;100ms</span>
+    <span class="stat-label">Message Latency</span>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <span class="stat-num">99.9%</span>
+    <span class="stat-label">Uptime SLA</span>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <span class="stat-num">100%</span>
+    <span class="stat-label">Free to Start</span>
+  </div>
+</section>
+
+<!-- ── FEATURES SECTION ──────────────────────────────────────────── -->
+<section class="features" id="features">
+  <div class="section-header">
+    <span class="section-badge">Everything you need</span>
+    <h2 class="section-title">Built for real conversations</h2>
+    <p class="section-sub">From quick DMs to large group rooms — ConnectHub has the tools to keep everyone in sync.</p>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">💬</div>
+      <h3>Direct Messages</h3>
+      <p>One-on-one private conversations with read receipts, typing indicators and media sharing.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🏠</div>
+      <h3>Chat Rooms</h3>
+      <p>Create public or private rooms for teams, communities or topics. Invite anyone instantly.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🖼️</div>
+      <h3>Media Sharing</h3>
+      <p>Send images, videos and files. Stream media inline with a beautiful lightbox viewer.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📌</div>
+      <h3>Pin Messages</h3>
+      <p>Highlight important messages at the top of any room. Exclusive to Premium members.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔔</div>
+      <h3>Smart Notifications</h3>
+      <p>Real-time alerts for mentions, new messages and system events — never miss a thing.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⭐</div>
+      <h3>Premium Plan</h3>
+      <p>Unlock exclusive features, unlimited rooms and a premium badge to stand out in the community.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA BANNER ───────────────────────────────────────────────── -->
+<section class="cta-banner">
+  <div class="cta-inner">
+    <h2>Ready to start chatting?</h2>
+    <p>Join thousands of users already connected on ConnectHub. It's free to get started.</p>
+    <button class="btn-primary large" id="cta-started-btn" (click)="goToRegister()">
+      Create Free Account →
+    </button>
+  </div>
+</section>
+
+<!-- ── FOOTER ────────────────────────────────────────────────────── -->
+<footer class="footer" id="footer">
+  <div class="footer-inner">
+    <!-- Brand -->
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <div class="logo-icon small">
+          <svg width="16" height="16" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="15" stroke="white" stroke-width="1.5"/>
+            <path d="M8 12h16M8 16h10M8 20h13" stroke="#c084fc" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span>ConnectHub</span>
+      </div>
+      <p class="footer-desc">Connecting people worldwide with real-time messaging and a modern chat experience.</p>
+    </div>
+
+    <!-- Links -->
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <ul>
+        <li><a (click)="goToRegister()">Create Account</a></li>
+        <li><a (click)="goToLogin()">Sign In</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#stats">Premium</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Help Center</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Contact Us</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <span>© 2025 ConnectHub. All rights reserved. Built with ❤️ for real-time communication.</span>
+  </div>
+</footer>
